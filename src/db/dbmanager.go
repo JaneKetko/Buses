@@ -10,7 +10,7 @@ import (
 	"github.com/JaneKetko/Buses/src/structs"
 )
 
-//RouteDB - struct for describing route from db
+//RouteDB - struct for describing route from db.
 type RouteDB struct {
 	IDRoute    int
 	Starttime  string
@@ -22,17 +22,17 @@ type RouteDB struct {
 	Endpoint   string
 }
 
-//DBManager - struct for storing database
+//DBManager - struct for storing database.
 type DBManager struct {
 	db *sql.DB
 }
 
-//NewDBManager - constructor for DBManager
+//NewDBManager - constructor for DBManager.
 func NewDBManager(db *sql.DB) *DBManager {
 	return &DBManager{db}
 }
 
-//ConvertTypes - convert RouteDB to Route
+//ConvertTypes - convert RouteDB to Route.
 func ConvertTypes(routeDB RouteDB) (structs.Route, error) {
 	var route structs.Route
 	date, err := time.Parse("2006-01-02 15:04:05", routeDB.Starttime)
@@ -49,7 +49,7 @@ func ConvertTypes(routeDB RouteDB) (structs.Route, error) {
 	return route, nil
 }
 
-//Open - method that opens connection with database
+//Open - method that opens connection with database.
 func Open(config *config.Config) (*sql.DB, error) {
 
 	db, err := sql.Open("mysql",
@@ -59,19 +59,18 @@ func Open(config *config.Config) (*sql.DB, error) {
 	}
 	err = db.Ping()
 	if err != nil {
-		return nil, errors.New("Database hasn't connected")
+		return nil, errors.New("database hasn't connected")
 	}
 	return db, nil
 }
 
-//GetAllData - get full data from db
+//GetAllData - get full data from db.
 func (db *DBManager) GetAllData() ([]structs.Route, error) {
 	rows, err := db.db.Query(`SELECT r.id_route, r.starttime, r.cost, r.freeseats, r.allseats,
 		p.id_points, p.startpoint, p.endpoint
 		FROM route r JOIN points p ON r.id_points = p.id_points`)
-	//WHERE DATE(r.starttime) >= DATE(NOW())
 	if err != nil {
-		return nil, errors.New("Data hasn't read")
+		return nil, errors.New("data hasn't read")
 	}
 	defer func() {
 		err = rows.Close()
@@ -83,11 +82,11 @@ func (db *DBManager) GetAllData() ([]structs.Route, error) {
 		err = rows.Scan(&dbr.IDRoute, &dbr.Starttime, &dbr.Cost, &dbr.Freeseats,
 			&dbr.Allseats, &dbr.IDPoint, &dbr.Startpoint, &dbr.Endpoint)
 		if err != nil {
-			return nil, errors.New("No data")
+			return nil, errors.New("no data")
 		}
 		route, err := ConvertTypes(dbr)
 		if err != nil {
-			return nil, errors.New("Errors with types")
+			return nil, errors.New("errors with types")
 		}
 
 		routes = append(routes, route)
@@ -95,7 +94,7 @@ func (db *DBManager) GetAllData() ([]structs.Route, error) {
 	return routes, nil
 }
 
-//RouteByID - find route by id in database
+//RouteByID - find route by id in database.
 func (db *DBManager) RouteByID(id int) (structs.Route, error) {
 	rows, err := db.db.Query("SELECT r.id_route, r.starttime, r.cost, r.freeseats, r.allseats, "+
 		"p.id_points, p.startpoint, p.endpoint "+
@@ -103,7 +102,7 @@ func (db *DBManager) RouteByID(id int) (structs.Route, error) {
 	var routeDB RouteDB
 	var route structs.Route
 	if err != nil {
-		return route, errors.New("Data hasn't read")
+		return route, errors.New("data hasn't read")
 	}
 
 	defer func() {
@@ -111,23 +110,23 @@ func (db *DBManager) RouteByID(id int) (structs.Route, error) {
 	}()
 
 	if !rows.Next() {
-		return route, errors.New("No such route")
+		return route, errors.New("no such route")
 	}
 
 	err = rows.Scan(&routeDB.IDRoute, &routeDB.Starttime, &routeDB.Cost, &routeDB.Freeseats,
 		&routeDB.Allseats, &routeDB.IDPoint, &routeDB.Startpoint, &routeDB.Endpoint)
 	if err != nil {
-		return route, errors.New("Something is wrong")
+		return route, errors.New("something is wrong")
 	}
 
 	route, err = ConvertTypes(routeDB)
 	if err != nil {
-		return route, errors.New("Errors with types")
+		return route, errors.New("errors with types")
 	}
 	return route, nil
 }
 
-//DeleteRow - delete row from database by id
+//DeleteRow - delete row from database by id.
 func (db *DBManager) DeleteRow(id int) error {
 	stmtIns, err := db.db.Prepare("DELETE FROM route where id_route=?")
 	if err != nil {
@@ -138,18 +137,18 @@ func (db *DBManager) DeleteRow(id int) error {
 		return errors.New(err.Error())
 	}
 	if n, _ := rows.RowsAffected(); n == 0 {
-		return errors.New("No such route")
+		return errors.New("no such route")
 	}
 	return nil
 }
 
-//FindRoute - find row in database by date and endpoint
+//FindRoute - find row in database by date and endpoint.
 func (db *DBManager) FindRoute(point string) ([]structs.Route, error) {
 	rows, err := db.db.Query("SELECT r.id_route, r.starttime, r.cost, r.freeseats, r.allseats, "+
 		"p.id_points, p.startpoint, p.endpoint "+
 		"FROM route r JOIN points p on r.id_points = p.id_points WHERE p.endpoint=?", point)
 	if err != nil {
-		return nil, errors.New("Data hasn't read")
+		return nil, errors.New("data hasn't read")
 	}
 
 	defer func() {
@@ -162,11 +161,11 @@ func (db *DBManager) FindRoute(point string) ([]structs.Route, error) {
 		err = rows.Scan(&dbr.IDRoute, &dbr.Starttime, &dbr.Cost, &dbr.Freeseats,
 			&dbr.Allseats, &dbr.IDPoint, &dbr.Startpoint, &dbr.Endpoint)
 		if err != nil {
-			return nil, errors.New("No data")
+			return nil, errors.New("no data")
 		}
 		route, err := ConvertTypes(dbr)
 		if err != nil {
-			return nil, errors.New("Errors with types")
+			return nil, errors.New("errors with types")
 		}
 		routes = append(routes, route)
 	}
@@ -217,13 +216,13 @@ func insertRoute(db *sql.DB, id, freeseats, allseats int, datetime string, cost 
 	return idRoute, nil
 }
 
-//AddRoute - method of adding route to database
+//AddRoute - method of adding route to database.
 func (db *DBManager) AddRoute(startpoint, endpoint, datetime string,
 	cost float32, freeseats, allseats int) (int, error) {
 	rows, err := db.db.Query("SELECT * FROM points WHERE startpoint=? AND endpoint=?",
 		startpoint, endpoint)
 	if err != nil {
-		return 0, errors.New("Data hasn't read")
+		return 0, errors.New("data hasn't read")
 	}
 
 	defer func() {

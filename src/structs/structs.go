@@ -4,7 +4,7 @@ import (
 	"time"
 )
 
-//Route - struct for describing route of any bus
+//Route - struct for describing route of any bus.
 type Route struct {
 	ID        int       `json:"id"`
 	Points    Points    `json:"points"`
@@ -14,7 +14,7 @@ type Route struct {
 	AllSeats  int       `json:"allseats"`
 }
 
-//Points - struct for showing points of route
+//Points - struct for showing points of route.
 type Points struct {
 	StartPoint string `json:"startpoint"`
 	EndPoint   string `json:"endpoint"`

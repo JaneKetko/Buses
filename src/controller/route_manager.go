@@ -7,7 +7,7 @@ import (
 	"github.com/JaneKetko/Buses/src/structs"
 )
 
-//WorkDB - interface for database methods
+//WorkDB - interface for database methods.
 type WorkDB interface {
 	GetAllData() ([]structs.Route, error)
 	RouteByID(id int) (structs.Route, error)
@@ -17,18 +17,18 @@ type WorkDB interface {
 		cost float32, freeseats, allseats int) (int, error)
 }
 
-//RouteManager - struct for slice of routes
+//RouteManager - struct for slice of routes.
 type RouteManager struct {
 	//Db *dbmanager.DBManager
 	Work WorkDB
 }
 
-//NewRouteManager - create new object of RouteManager struct
+//NewRouteManager - create new object of RouteManager struct.
 func NewRouteManager(work WorkDB) *RouteManager {
 	return &RouteManager{Work: work}
 }
 
-//GetAllRoutes - method that gets all routes
+//GetAllRoutes - method that gets all routes.
 func (r RouteManager) GetAllRoutes() ([]structs.Route, error) {
 
 	routes, err := r.Work.GetAllData()
@@ -38,7 +38,7 @@ func (r RouteManager) GetAllRoutes() ([]structs.Route, error) {
 	return routes, nil
 }
 
-//GetRouteByID - Method that gets route by id
+//GetRouteByID - Method that gets route by id.
 func (r RouteManager) GetRouteByID(id int) (structs.Route, error) {
 
 	route, err := r.Work.RouteByID(id)
@@ -49,10 +49,10 @@ func (r RouteManager) GetRouteByID(id int) (structs.Route, error) {
 	return route, nil
 }
 
-//CreateNewRoute - Method of creating new route
+//CreateNewRoute - Method of creating new route.
 func (r *RouteManager) CreateNewRoute(route *structs.Route) error {
 	if route.Start.Before(time.Now()) {
-		return errors.New("Date is invalid")
+		return errors.New("date is invalid")
 	}
 	id, err := r.Work.AddRoute(route.Points.StartPoint,
 		route.Points.EndPoint,
@@ -68,7 +68,7 @@ func (r *RouteManager) CreateNewRoute(route *structs.Route) error {
 	return nil
 }
 
-//DeleteRouteByID - Method of deleting route from all routes by id
+//DeleteRouteByID - Method of deleting route from all routes by id.
 func (r *RouteManager) DeleteRouteByID(id int) error {
 
 	err := r.Work.DeleteRow(id)
@@ -78,7 +78,7 @@ func (r *RouteManager) DeleteRouteByID(id int) error {
 	return nil
 }
 
-//ChooseRoutesByDateAndPoint - Method that choose routes by date and point
+//ChooseRoutesByDateAndPoint - Method that choose routes by date and point.
 func (r RouteManager) ChooseRoutesByDateAndPoint(date time.Time, point string) ([]structs.Route, error) {
 
 	routes, err := r.Work.FindRoute(point)
@@ -94,7 +94,7 @@ func (r RouteManager) ChooseRoutesByDateAndPoint(date time.Time, point string) (
 		}
 	}
 	if len(routesDate) == 0 {
-		return routesDate, errors.New("No such routes")
+		return routesDate, errors.New("no such routes")
 	}
 	return routesDate, nil
 }

@@ -15,27 +15,18 @@ import (
 	"github.com/gorilla/mux"
 )
 
-//BusStation - struct for describing bus station
+//BusStation - struct for describing bus station.
 type BusStation struct {
 	Routes *routemanager.RouteManager
 	Config *config.Config
 }
 
-//NewBusStation - constructor for BusStation
+//NewBusStation - constructor for BusStation.
 func NewBusStation(routes *routemanager.RouteManager, config *config.Config) *BusStation {
 	return &BusStation{Routes: routes,
 		Config: config,
 	}
 }
-
-// //WorkDB - initialize database
-// func WorkDB(db *dbmanager.DBManager) *BusStation {
-// 	routes := routemanager.RouteManager{
-// 		Db: db,
-// 	}
-
-// 	return &BusStation{&routes}
-// }
 
 func (b *BusStation) getRoutes(w http.ResponseWriter, r *http.Request) {
 	w.Header().Set("Content-Type", "application/json")
