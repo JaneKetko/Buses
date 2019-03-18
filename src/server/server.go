@@ -9,28 +9,28 @@ import (
 	"time"
 
 	"github.com/JaneKetko/Buses/src/config"
-	routemanager "github.com/JaneKetko/Buses/src/controller"
-	"github.com/JaneKetko/Buses/src/structs"
+	"github.com/JaneKetko/Buses/src/domain"
+	"github.com/JaneKetko/Buses/src/routemanager"
 
 	"github.com/gorilla/mux"
 )
 
-//BusStation - struct for describing bus station.
+//BusStation - struct for describing bus station: manager for work with route info and configuration for server.
 type BusStation struct {
-	Routes *routemanager.RouteManager
-	Config *config.Config
+	routes *routemanager.RouteManager
+	config *config.Config
 }
 
 //NewBusStation - constructor for BusStation.
-func NewBusStation(routes *routemanager.RouteManager, config *config.Config) *BusStation {
-	return &BusStation{Routes: routes,
-		Config: config,
+func NewBusStation(r *routemanager.RouteManager, c *config.Config) *BusStation {
+	return &BusStation{routes: r,
+		config: c,
 	}
 }
 
 func (b *BusStation) getRoutes(w http.ResponseWriter, r *http.Request) {
 	w.Header().Set("Content-Type", "application/json")
-	rts, err := b.Routes.GetAllRoutes()
+	rts, err := b.routes.GetAllRoutes()
 	if err != nil {
 		http.Error(w, err.Error(), http.StatusBadRequest)
 		return
@@ -45,18 +45,24 @@ func (b *BusStation) getRoutes(w http.ResponseWriter, r *http.Request) {
 func (b *BusStation) getRoute(w http.ResponseWriter, r *http.Request) {
 	w.Header().Set("Content-Type", "application/json")
 	params := mux.Vars(r)
-	id, err := strconv.Atoi(params["id"])
+	idparam := params["id"]
+
+	if idparam == "" {
+		http.Error(w, "invalid id", http.StatusBadRequest)
+		return
+	}
+	id, err := strconv.Atoi(idparam)
 	if err != nil {
 		http.Error(w, err.Error(), http.StatusBadRequest)
 		return
 	}
 
-	route, err := b.Routes.GetRouteByID(id)
+	route, err := b.routes.GetRouteByID(id)
 	if err != nil {
 		http.Error(w, err.Error(), http.StatusBadRequest)
 		return
 	}
-	err = json.NewEncoder(w).Encode(route)
+	err = json.NewEncoder(w).Encode(&route)
 	if err != nil {
 		http.Error(w, err.Error(), http.StatusBadRequest)
 		return
@@ -66,13 +72,13 @@ func (b *BusStation) getRoute(w http.ResponseWriter, r *http.Request) {
 func (b *BusStation) createRoute(w http.ResponseWriter, r *http.Request) {
 	w.Header().Set("Content-Type", "application/json")
 
-	var route structs.Route
+	var route domain.Route
 	err := json.NewDecoder(r.Body).Decode(&route)
 	if err != nil {
 		http.Error(w, err.Error(), http.StatusBadRequest)
 		return
 	}
-	err = b.Routes.CreateNewRoute(&route)
+	err = b.routes.CreateNewRoute(&route)
 	if err != nil {
 		http.Error(w, err.Error(), http.StatusBadRequest)
 		return
@@ -92,13 +98,13 @@ func (b *BusStation) deleteRoute(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	err = b.Routes.DeleteRouteByID(id)
+	err = b.routes.DeleteRouteByID(id)
 	if err != nil {
 		http.Error(w, err.Error(), http.StatusBadRequest)
 		return
 	}
 
-	rts, err := b.Routes.GetAllRoutes()
+	rts, err := b.routes.GetAllRoutes()
 	if err != nil {
 		http.Error(w, err.Error(), http.StatusBadRequest)
 		return
@@ -121,7 +127,7 @@ func (b *BusStation) searchRoutes(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	routesDate, err := b.Routes.ChooseRoutesByDateAndPoint(date, point)
+	routesDate, err := b.routes.ChooseRoutesByDateAndPoint(date, point)
 	if err != nil {
 		http.Error(w, err.Error(), http.StatusBadRequest)
 		return
@@ -138,11 +144,11 @@ func (b *BusStation) searchRoutes(w http.ResponseWriter, r *http.Request) {
 func (b *BusStation) StartServer() {
 	r := mux.NewRouter()
 
-	fmt.Printf("Started server at http://localhost%v.\n", ":"+strconv.Itoa(b.Config.PortServer))
+	fmt.Printf("Started server at http://localhost%v.\n", ":"+strconv.Itoa(b.config.PortServer))
 	r.HandleFunc("/route_search", b.searchRoutes).Queries("date", "{date}", "point", "{point}").Methods(http.MethodGet)
 	r.HandleFunc("/routes", b.getRoutes).Methods(http.MethodGet)
 	r.HandleFunc("/routes", b.createRoute).Methods(http.MethodPost)
 	r.HandleFunc("/routes/{id}", b.getRoute).Methods(http.MethodGet)
 	r.HandleFunc("/routes/{id}", b.deleteRoute).Methods(http.MethodDelete)
-	log.Fatal(http.ListenAndServe(":"+strconv.Itoa(b.Config.PortServer), r))
+	log.Fatal(http.ListenAndServe(":"+strconv.Itoa(b.config.PortServer), r))
 }

@@ -13,4 +13,4 @@ script:
   - go test -v ./... -race -coverprofile=coverage.txt -covermode=atomic GOCACHE=off
 
 after_success:
-  - bash <(curl -s https://codecov.io/bash) CODECOV_TOKEN="f332cacc-4499-49c1-9ffc-e9a659983871"
+  - bash <(curl -s https://codecov.io/bash) 
