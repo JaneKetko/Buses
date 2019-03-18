@@ -7,7 +7,7 @@ import (
 	"github.com/JaneKetko/Buses/src/domain"
 )
 
-//WorkDB - interface for database methods.
+//RouteStorage - interface for database methods.
 type RouteStorage interface {
 	GetAllData() ([]domain.Route, error)
 	RouteByID(id int) (*domain.Route, error)
