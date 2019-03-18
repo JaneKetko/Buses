@@ -13,4 +13,8 @@ script:
   - go test -v ./... -race -coverprofile=coverage.txt -covermode=atomic GOCACHE=off
 
 after_success:
+<<<<<<< HEAD
   - bash <(curl -s https://codecov.io/bash) 
+=======
+  - bash <(curl -s https://codecov.io/bash)
+>>>>>>> 2c920960d295b5643c0648faf58ed2b1cb556135
