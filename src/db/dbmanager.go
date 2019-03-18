@@ -33,7 +33,7 @@ func NewDBManager(db *sql.DB) *DBManager {
 }
 
 //ConvertTypes - convert RouteDB to Route.
-func ConvertTypes(routeDB RouteDB) (structs.Route, error) {
+func convertTypes(routeDB RouteDB) (structs.Route, error) {
 	var route structs.Route
 	date, err := time.Parse("2006-01-02 15:04:05", routeDB.Starttime)
 	if err != nil {
@@ -84,7 +84,7 @@ func (db *DBManager) GetAllData() ([]structs.Route, error) {
 		if err != nil {
 			return nil, errors.New("no data")
 		}
-		route, err := ConvertTypes(dbr)
+		route, err := convertTypes(dbr)
 		if err != nil {
 			return nil, errors.New("errors with types")
 		}
@@ -119,7 +119,7 @@ func (db *DBManager) RouteByID(id int) (structs.Route, error) {
 		return route, errors.New("something is wrong")
 	}
 
-	route, err = ConvertTypes(routeDB)
+	route, err = convertTypes(routeDB)
 	if err != nil {
 		return route, errors.New("errors with types")
 	}
@@ -163,7 +163,7 @@ func (db *DBManager) FindRoute(point string) ([]structs.Route, error) {
 		if err != nil {
 			return nil, errors.New("no data")
 		}
-		route, err := ConvertTypes(dbr)
+		route, err := convertTypes(dbr)
 		if err != nil {
 			return nil, errors.New("errors with types")
 		}
@@ -239,7 +239,6 @@ func (db *DBManager) AddRoute(startpoint, endpoint, datetime string,
 		if err != nil {
 			return 0, errors.New(err.Error())
 		}
-
 	} else {
 		var id int
 		var start, end string
