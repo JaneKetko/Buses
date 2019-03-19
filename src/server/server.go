@@ -9,7 +9,6 @@ import (
 	"time"
 
 	"github.com/JaneKetko/Buses/src/config"
-	"github.com/JaneKetko/Buses/src/domain"
 	"github.com/JaneKetko/Buses/src/routemanager"
 
 	"github.com/gorilla/mux"
@@ -30,12 +29,19 @@ func NewBusStation(r *routemanager.RouteManager, c *config.Config) *BusStation {
 
 func (b *BusStation) getRoutes(w http.ResponseWriter, r *http.Request) {
 	w.Header().Set("Content-Type", "application/json")
+
 	rts, err := b.routes.GetAllRoutes()
 	if err != nil {
 		http.Error(w, err.Error(), http.StatusInternalServerError)
 		return
 	}
-	err = json.NewEncoder(w).Encode(rts)
+	rserver := make([]routeServer, 0, 0)
+	for _, rt := range rts {
+		route := routeToRouteServer(rt)
+		rserver = append(rserver, route)
+	}
+
+	err = json.NewEncoder(w).Encode(rserver)
 	if err != nil {
 		http.Error(w, err.Error(), http.StatusBadRequest)
 		return
@@ -62,7 +68,8 @@ func (b *BusStation) getRoute(w http.ResponseWriter, r *http.Request) {
 		http.Error(w, err.Error(), http.StatusInternalServerError)
 		return
 	}
-	err = json.NewEncoder(w).Encode(&route)
+	rserver := routeToRouteServer(*route)
+	err = json.NewEncoder(w).Encode(&rserver)
 	if err != nil {
 		http.Error(w, err.Error(), http.StatusBadRequest)
 		return
@@ -72,18 +79,27 @@ func (b *BusStation) getRoute(w http.ResponseWriter, r *http.Request) {
 func (b *BusStation) createRoute(w http.ResponseWriter, r *http.Request) {
 	w.Header().Set("Content-Type", "application/json")
 
-	var route domain.Route
-	err := json.NewDecoder(r.Body).Decode(&route)
+	var rserver routeServer
+	err := json.NewDecoder(r.Body).Decode(&rserver)
 	if err != nil {
 		http.Error(w, err.Error(), http.StatusBadRequest)
 		return
 	}
+
+	if err != nil {
+		http.Error(w, err.Error(), http.StatusBadRequest)
+		return
+	}
+
+	route := routeServerToRoute(rserver)
 	err = b.routes.CreateNewRoute(&route)
 	if err != nil {
 		http.Error(w, err.Error(), http.StatusBadRequest)
 		return
 	}
-	err = json.NewEncoder(w).Encode(route)
+
+	rsencode := routeToRouteServer(route)
+	err = json.NewEncoder(w).Encode(&rsencode)
 	if err != nil {
 		http.Error(w, err.Error(), http.StatusBadRequest)
 	}
@@ -109,7 +125,13 @@ func (b *BusStation) deleteRoute(w http.ResponseWriter, r *http.Request) {
 		http.Error(w, err.Error(), http.StatusInternalServerError)
 		return
 	}
-	err = json.NewEncoder(w).Encode(rts)
+	rserver := make([]routeServer, 0, 0)
+	for _, rt := range rts {
+		route := routeToRouteServer(rt)
+		rserver = append(rserver, route)
+	}
+
+	err = json.NewEncoder(w).Encode(rserver)
 	if err != nil {
 		http.Error(w, err.Error(), http.StatusBadRequest)
 		return
@@ -132,8 +154,12 @@ func (b *BusStation) searchRoutes(w http.ResponseWriter, r *http.Request) {
 		http.Error(w, err.Error(), http.StatusInternalServerError)
 		return
 	}
-
-	err = json.NewEncoder(w).Encode(routesDate)
+	rserver := make([]routeServer, 0, 0)
+	for _, rt := range routesDate {
+		route := routeToRouteServer(rt)
+		rserver = append(rserver, route)
+	}
+	err = json.NewEncoder(w).Encode(rserver)
 	if err != nil {
 		http.Error(w, err.Error(), http.StatusBadRequest)
 		return

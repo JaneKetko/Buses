@@ -1,4 +1,4 @@
-//+build integration
+// +build integration
 
 package dbmanager
 
@@ -36,9 +36,9 @@ func TestRouteID(t *testing.T) {
 	db, err := dbOpen()
 	require.NoError(t, err)
 	dbmanager := NewDBManager(db)
-	id1, err := dbmanager.insertRoute(7, 32, 44, "2019-02-24 08:30:00", 15.2)
+	id1, err := dbmanager.insertRoute(7, 32, 44, 1500, "2019-02-24 08:30:00")
 	require.NoError(t, err)
-	_, err = dbmanager.insertRoute(7, 32, 44, "02-24 08:30:00", 15.2)
+	_, err = dbmanager.insertRoute(7, 32, 44, 1520, "02-24 08:30:00")
 	require.Error(t, err, "invalid format of date")
 
 	_, err = dbmanager.RouteByID(int(id1))
@@ -54,16 +54,16 @@ func TestAddRoute(t *testing.T) {
 	require.NoError(t, err)
 	dbmanager := NewDBManager(db)
 
-	_, err = dbmanager.AddRoute("Minsk", "Vitebsk", "2019-02- 08:30:00", 15.2, 32, 44)
+	_, err = dbmanager.AddRoute("Minsk", "Vitebsk", "2019-02- 08:30:00", 1520, 32, 44)
 	require.Error(t, err)
 
-	id, err := dbmanager.AddRoute("Minsk", "Vitebsk", "2019-02-24 08:30:00", 15.2, 32, 44)
+	id, err := dbmanager.AddRoute("Minsk", "Vitebsk", "2019-02-24 08:30:00", 1520, 32, 44)
 	require.NoError(t, err)
 
 	_, err = db.Exec("DELETE FROM route where id_route=?", id)
 	assert.NoError(t, err)
 
-	id, err = dbmanager.AddRoute("Minsk", "Lida", "2019-02-24 08:30:00", 15.2, 32, 44)
+	id, err = dbmanager.AddRoute("Minsk", "Lida", "2019-02-24 08:30:00", 1520, 32, 44)
 	require.NoError(t, err)
 	_, err = db.Exec("DELETE FROM points where startpoint=? && endpoint=?", "Minsk", "Lida")
 	assert.NoError(t, err)
@@ -77,11 +77,11 @@ func TestGetAllData(t *testing.T) {
 	require.NoError(t, err)
 	dbmanager := NewDBManager(db)
 
-	id1, err := dbmanager.AddRoute("Minsk", "Vitebsk", "2019-02-24 08:30:00", 15.2, 32, 44)
+	id1, err := dbmanager.AddRoute("Minsk", "Vitebsk", "2019-02-24 08:30:00", 1520, 32, 44)
 	require.NoError(t, err)
-	id2, err := dbmanager.AddRoute("Minsk", "Vitebsk", "2019-02-24 08:30:00", 15.2, 32, 44)
+	id2, err := dbmanager.AddRoute("Minsk", "Vitebsk", "2019-02-24 08:30:00", 1520, 32, 44)
 	require.NoError(t, err)
-	id3, err := dbmanager.AddRoute("Minsk", "Vitebsk", "2019-02-24 08:30:00", 15.2, 32, 44)
+	id3, err := dbmanager.AddRoute("Minsk", "Vitebsk", "2019-02-24 08:30:00", 1520, 32, 44)
 	require.NoError(t, err)
 
 	routes, err := dbmanager.GetAllData()
@@ -98,7 +98,7 @@ func TestDeleteRoute(t *testing.T) {
 	require.NoError(t, err)
 	dbmanager := NewDBManager(db)
 
-	id, err := dbmanager.AddRoute("Minsk", "Vitebsk", "2019-02-24 08:30:00", 15.2, 32, 44)
+	id, err := dbmanager.AddRoute("Minsk", "Vitebsk", "2019-02-24 08:30:00", 1520, 32, 44)
 	require.NoError(t, err)
 	err = dbmanager.DeleteRow(id)
 	require.NoError(t, err)
@@ -113,14 +113,14 @@ func TestFindRoute(t *testing.T) {
 	require.NoError(t, err)
 	dbmanager := NewDBManager(db)
 
-	id1, err := dbmanager.AddRoute("Minsk", "Gomel", "2019-02-24 08:30:00", 15.2, 32, 44)
+	id1, err := dbmanager.AddRoute("Minsk", "Gomel", "2019-02-24 08:30:00", 1520, 32, 44)
 	require.NoError(t, err)
-	id2, err := dbmanager.AddRoute("Minsk", "Gomel", "2019-02-24 08:30:00", 15.2, 32, 44)
+	id2, err := dbmanager.AddRoute("Minsk", "Gomel", "2019-02-24 08:30:00", 1520, 32, 44)
 	require.NoError(t, err)
-	id3, err := dbmanager.AddRoute("Minsk", "Lida", "2019-02-24 08:30:00", 15.2, 32, 44)
+	id3, err := dbmanager.AddRoute("Minsk", "Lida", "2019-02-24 08:30:00", 1520, 32, 44)
 	require.NoError(t, err)
 
-	routes, err := dbmanager.FindRoutes("Gomel")
+	routes, err := dbmanager.RoutesByEndPoint("Gomel")
 	assert.NoError(t, err)
 
 	assert.Equal(t, 2, len(routes))

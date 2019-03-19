@@ -6,16 +6,16 @@ import (
 
 //Route - struct for describing route of any bus.
 type Route struct {
-	ID        int       `json:"id"`
-	Points    Points    `json:"points"`
-	Start     time.Time `json:"start_time"`
-	Cost      int       `json:"cost"`
-	FreeSeats int       `json:"freeseats"`
-	AllSeats  int       `json:"allseats"`
+	ID        int
+	Points    Points
+	Start     time.Time
+	Cost      int
+	FreeSeats int
+	AllSeats  int
 }
 
 //Points - struct for showing points of route.
 type Points struct {
-	StartPoint string `json:"startpoint"`
-	EndPoint   string `json:"endpoint"`
+	StartPoint string
+	EndPoint   string
 }
