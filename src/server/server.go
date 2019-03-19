@@ -32,7 +32,7 @@ func (b *BusStation) getRoutes(w http.ResponseWriter, r *http.Request) {
 	w.Header().Set("Content-Type", "application/json")
 	rts, err := b.routes.GetAllRoutes()
 	if err != nil {
-		http.Error(w, err.Error(), http.StatusBadRequest)
+		http.Error(w, err.Error(), http.StatusInternalServerError)
 		return
 	}
 	err = json.NewEncoder(w).Encode(rts)
@@ -59,7 +59,7 @@ func (b *BusStation) getRoute(w http.ResponseWriter, r *http.Request) {
 
 	route, err := b.routes.GetRouteByID(id)
 	if err != nil {
-		http.Error(w, err.Error(), http.StatusBadRequest)
+		http.Error(w, err.Error(), http.StatusInternalServerError)
 		return
 	}
 	err = json.NewEncoder(w).Encode(&route)
@@ -100,13 +100,13 @@ func (b *BusStation) deleteRoute(w http.ResponseWriter, r *http.Request) {
 
 	err = b.routes.DeleteRouteByID(id)
 	if err != nil {
-		http.Error(w, err.Error(), http.StatusBadRequest)
+		http.Error(w, err.Error(), http.StatusInternalServerError)
 		return
 	}
 
 	rts, err := b.routes.GetAllRoutes()
 	if err != nil {
-		http.Error(w, err.Error(), http.StatusBadRequest)
+		http.Error(w, err.Error(), http.StatusInternalServerError)
 		return
 	}
 	err = json.NewEncoder(w).Encode(rts)
@@ -120,16 +120,16 @@ func (b *BusStation) searchRoutes(w http.ResponseWriter, r *http.Request) {
 	w.Header().Set("Content-Type", "application/json")
 	params := mux.Vars(r)
 	searchDate := params["date"]
-	point := params["point"]
+	endpoint := params["point"]
 	date, err := time.Parse("2006-01-02", searchDate)
 	if err != nil {
 		http.Error(w, "Invalid date argument!", http.StatusBadRequest)
 		return
 	}
 
-	routesDate, err := b.routes.ChooseRoutesByDateAndPoint(date, point)
+	routesDate, err := b.routes.ChooseRoutesByDateAndPoint(date, endpoint)
 	if err != nil {
-		http.Error(w, err.Error(), http.StatusBadRequest)
+		http.Error(w, err.Error(), http.StatusInternalServerError)
 		return
 	}
 

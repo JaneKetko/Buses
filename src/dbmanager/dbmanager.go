@@ -16,7 +16,7 @@ import (
 type RouteDB struct {
 	idRoute    int
 	startTime  string
-	cost       float32
+	cost       int
 	freeSeats  int
 	allSeats   int
 	idPoint    int
@@ -152,10 +152,10 @@ func (dbmanager *DBManager) DeleteRow(id int) error {
 }
 
 //FindRoute finds row in database by date and endpoint.
-func (dbmanager *DBManager) FindRoute(point string) ([]domain.Route, error) {
+func (dbmanager *DBManager) RoutesByEndPoint(endpoint string) ([]domain.Route, error) {
 	rows, err := dbmanager.db.Query(`SELECT r.id_route, r.starttime, r.cost, r.freeseats, r.allseats, 
 	p.id_points, p.startpoint, p.endpoint 
-	FROM route r JOIN points p on r.id_points = p.id_points WHERE p.endpoint=?`, point)
+	FROM route r JOIN points p on r.id_points = p.id_points WHERE p.endpoint=?`, endpoint)
 	if err != nil {
 		return nil, errors.New("data hasn't read")
 	}
@@ -209,7 +209,7 @@ func (dbmanager *DBManager) insertPoint(startpoint, endpoint string) (int64, err
 	return pointID, nil
 }
 
-func (dbmanager *DBManager) insertRoute(id, freeseats, allseats int, datetime string, cost float32) (int64, error) {
+func (dbmanager *DBManager) insertRoute(id, freeseats, allseats, cost int, datetime string) (int64, error) {
 
 	date, err := time.Parse("2006-01-02 15:04:05", datetime)
 	if err != nil {
@@ -241,7 +241,7 @@ func (dbmanager *DBManager) insertRoute(id, freeseats, allseats int, datetime st
 
 //AddRoute adds route to database.
 func (dbmanager *DBManager) AddRoute(startpoint, endpoint, datetime string,
-	cost float32, freeseats, allseats int) (int, error) {
+	cost, freeseats, allseats int) (int, error) {
 	rows, err := dbmanager.db.Query("SELECT * FROM points WHERE startpoint=? AND endpoint=?",
 		startpoint, endpoint)
 	if err != nil {
@@ -267,9 +267,8 @@ func (dbmanager *DBManager) AddRoute(startpoint, endpoint, datetime string,
 		if err != nil {
 			return 0, err
 		}
-
 	}
-	idRoute, err := dbmanager.insertRoute(int(pointID), freeseats, allseats, datetime, cost)
+	idRoute, err := dbmanager.insertRoute(int(pointID), freeseats, allseats, cost, datetime)
 	if err != nil {
 		return 0, err
 	}
