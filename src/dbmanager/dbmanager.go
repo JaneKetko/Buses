@@ -151,7 +151,7 @@ func (dbmanager *DBManager) DeleteRow(id int) error {
 	return nil
 }
 
-//FindRoute finds row in database by date and endpoint.
+//RoutesByEndPoint finds row in database by date and endpoint.
 func (dbmanager *DBManager) RoutesByEndPoint(endpoint string) ([]domain.Route, error) {
 	rows, err := dbmanager.db.Query(`SELECT r.id_route, r.starttime, r.cost, r.freeseats, r.allseats, 
 	p.id_points, p.startpoint, p.endpoint 
