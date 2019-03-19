@@ -242,7 +242,7 @@ func (dbmanager *DBManager) insertRoute(id, freeseats, allseats, cost int, datet
 //AddRoute adds route to database.
 func (dbmanager *DBManager) AddRoute(startpoint, endpoint, datetime string,
 	cost, freeseats, allseats int) (int, error) {
-	rows, err := dbmanager.db.Query("SELECT * FROM points WHERE startpoint=? AND endpoint=?",
+	rows, err := dbmanager.db.Query("SELECT id_points FROM points WHERE startpoint=? AND endpoint=?",
 		startpoint, endpoint)
 	if err != nil {
 		return 0, errors.New("data hasn't read")
@@ -262,8 +262,7 @@ func (dbmanager *DBManager) AddRoute(startpoint, endpoint, datetime string,
 			return 0, err
 		}
 	} else {
-		var start, end string
-		err = rows.Scan(&pointID, &start, &end)
+		err = rows.Scan(&pointID)
 		if err != nil {
 			return 0, err
 		}
