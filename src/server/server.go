@@ -35,7 +35,7 @@ func (b *BusStation) getRoutes(w http.ResponseWriter, r *http.Request) {
 		http.Error(w, err.Error(), http.StatusInternalServerError)
 		return
 	}
-	rserver := make([]routeServer, 0, 0)
+	rserver := make([]routeServer, 0)
 	for _, rt := range rts {
 		route := routeToRouteServer(rt)
 		rserver = append(rserver, route)
@@ -125,7 +125,7 @@ func (b *BusStation) deleteRoute(w http.ResponseWriter, r *http.Request) {
 		http.Error(w, err.Error(), http.StatusInternalServerError)
 		return
 	}
-	rserver := make([]routeServer, 0, 0)
+	rserver := make([]routeServer, 0)
 	for _, rt := range rts {
 		route := routeToRouteServer(rt)
 		rserver = append(rserver, route)
@@ -154,7 +154,7 @@ func (b *BusStation) searchRoutes(w http.ResponseWriter, r *http.Request) {
 		http.Error(w, err.Error(), http.StatusInternalServerError)
 		return
 	}
-	rserver := make([]routeServer, 0, 0)
+	rserver := make([]routeServer, 0)
 	for _, rt := range routesDate {
 		route := routeToRouteServer(rt)
 		rserver = append(rserver, route)
