@@ -1,6 +1,6 @@
 # Makefile
 
-all:
+run:
 	go get -d
 	go run *.go
 

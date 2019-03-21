@@ -4,7 +4,7 @@ import (
 	"github.com/koding/multiconfig"
 )
 
-//Config - struct for project info
+//Config - struct for project info.
 type Config struct {
 	PortServer int    `default:"8000"`
 	Login      string `default:"root"`
@@ -14,7 +14,7 @@ type Config struct {
 	DBName     string `default:"busstation"`
 }
 
-//GetData - get data from config file(new config object)
+//GetData - get data from config file(new config object).
 func GetData() *Config {
 	m := multiconfig.NewWithPath("config.toml")
 	configStruct := new(Config)
