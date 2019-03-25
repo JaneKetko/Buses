@@ -5,11 +5,10 @@ import (
 	"testing"
 	"time"
 
-	"github.com/stretchr/testify/assert"
-
 	"github.com/JaneKetko/Buses/src/domain"
-
 	"github.com/JaneKetko/Buses/src/routemanager/mocks"
+	"github.com/stretchr/testify/assert"
+	"github.com/stretchr/testify/require"
 )
 
 func TestRoutesByEndPoint(t *testing.T) {
@@ -40,7 +39,7 @@ func TestRoutesByEndPoint(t *testing.T) {
 			ID: 3,
 			Points: domain.Points{
 				StartPoint: "Pinsk",
-				EndPoint:   "Minsk",
+				EndPoint:   "Mir",
 			},
 			Start:     time.Date(2019, 04, 10, 10, 0, 0, 0, time.UTC),
 			Cost:      1000,
@@ -53,6 +52,7 @@ func TestRoutesByEndPoint(t *testing.T) {
 	routeman := NewRouteManager(&routestrg)
 
 	testCases := []struct {
+		name           string
 		date           time.Time
 		endPoint       string
 		expectedRoutes []domain.Route
@@ -61,14 +61,16 @@ func TestRoutesByEndPoint(t *testing.T) {
 		expTotalError  error
 	}{
 		{
-			date:           time.Date(2019, 04, 10, 10, 0, 0, 0, time.UTC),
+			name:           "successful test",
+			date:           time.Date(2019, 04, 12, 10, 0, 0, 0, time.UTC),
 			endPoint:       "Minsk",
-			expectedRoutes: routes,
+			expectedRoutes: routes[:2],
 			expectedError:  nil,
-			expTotalRoutes: routes[2:],
+			expTotalRoutes: routes[1:2],
 			expTotalError:  nil,
 		},
 		{
+			name:           "no routes by endpoint",
 			date:           time.Date(2019, 04, 10, 10, 0, 0, 0, time.UTC),
 			endPoint:       "Grodno",
 			expectedRoutes: nil,
@@ -77,9 +79,10 @@ func TestRoutesByEndPoint(t *testing.T) {
 			expTotalError:  errors.New("no such routes by this endpoint"),
 		},
 		{
+			name:           "no routes by date",
 			date:           time.Date(2022, 04, 10, 10, 0, 0, 0, time.UTC),
-			endPoint:       "Minsk",
-			expectedRoutes: routes,
+			endPoint:       "Mir",
+			expectedRoutes: routes[2:],
 			expectedError:  nil,
 			expTotalRoutes: nil,
 			expTotalError:  errors.New("no such routes"),
@@ -91,9 +94,12 @@ func TestRoutesByEndPoint(t *testing.T) {
 	}
 
 	for _, tc := range testCases {
-		rt, err := routeman.ChooseRoutesByDateAndPoint(tc.date, tc.endPoint)
-		assert.Equal(t, tc.expTotalError, err)
-		assert.Equal(t, tc.expTotalRoutes, rt)
+		tc := tc
+		t.Run(tc.name, func(t *testing.T) {
+			rt, err := routeman.ChooseRoutesByDateAndPoint(tc.date, tc.endPoint)
+			require.Equal(t, tc.expTotalError, err)
+			assert.Equal(t, tc.expTotalRoutes, rt)
+		})
 	}
 }
 
@@ -135,24 +141,28 @@ func TestCreateNewRoute(t *testing.T) {
 	}
 
 	testCases := []struct {
+		name          string
 		route         domain.Route
 		expectedID    int
 		expectedError error
 		expTotalError error
 	}{
 		{
+			name:          "invalid date",
 			route:         routes[0],
 			expectedID:    1,
 			expectedError: nil,
 			expTotalError: errors.New("date is invalid"),
 		},
 		{
+			name:          "errors",
 			route:         routes[1],
 			expectedID:    2,
 			expectedError: errors.New("smth bad"),
 			expTotalError: errors.New("smth bad"),
 		},
 		{
+			name:          "successful test",
 			route:         routes[2],
 			expectedID:    3,
 			expectedError: nil,
@@ -172,8 +182,11 @@ func TestCreateNewRoute(t *testing.T) {
 	}
 
 	for _, tc := range testCases {
-		err := routeman.CreateNewRoute(&tc.route)
-		assert.Equal(t, tc.expTotalError, err)
+		tc := tc
+		t.Run(tc.name, func(t *testing.T) {
+			err := routeman.CreateNewRoute(&tc.route)
+			require.Equal(t, tc.expTotalError, err)
+		})
 	}
 }
 
@@ -195,10 +208,12 @@ func TestGetAllRoutes(t *testing.T) {
 	routeman := NewRouteManager(&routestrg)
 
 	testCases := []struct {
+		name           string
 		expectedRoutes []domain.Route
 		expectedError  error
 	}{
 		{
+			name:           "successful test",
 			expectedRoutes: routes,
 			expectedError:  nil,
 		},
@@ -209,9 +224,12 @@ func TestGetAllRoutes(t *testing.T) {
 	}
 
 	for _, tc := range testCases {
-		rt, err := routeman.GetAllRoutes()
-		assert.Equal(t, tc.expectedError, err)
-		assert.Equal(t, tc.expectedRoutes, rt)
+		tc := tc
+		t.Run(tc.name, func(t *testing.T) {
+			rt, err := routeman.GetAllRoutes()
+			require.Equal(t, tc.expectedError, err)
+			assert.Equal(t, tc.expectedRoutes, rt)
+		})
 	}
 }
 
@@ -233,16 +251,19 @@ func TestGetRouteByID(t *testing.T) {
 	routeman := NewRouteManager(&routestrg)
 
 	testCases := []struct {
+		name          string
 		routeID       int
 		expectedRoute *domain.Route
 		expectedError error
 	}{
 		{
+			name:          "successful test",
 			routeID:       1,
 			expectedRoute: &routes[0],
 			expectedError: nil,
 		},
 		{
+			name:          "no route",
 			routeID:       2,
 			expectedRoute: nil,
 			expectedError: errors.New("no such route"),
@@ -254,9 +275,12 @@ func TestGetRouteByID(t *testing.T) {
 	}
 
 	for _, tc := range testCases {
-		rt, err := routeman.GetRouteByID(tc.routeID)
-		assert.Equal(t, tc.expectedError, err)
-		assert.Equal(t, tc.expectedRoute, rt)
+		tc := tc
+		t.Run(tc.name, func(t *testing.T) {
+			rt, err := routeman.GetRouteByID(tc.routeID)
+			require.Equal(t, tc.expectedError, err)
+			assert.Equal(t, tc.expectedRoute, rt)
+		})
 	}
 }
 
@@ -265,14 +289,17 @@ func TestDeleteRouteByID(t *testing.T) {
 	routeman := NewRouteManager(&routestrg)
 
 	testCases := []struct {
+		name          string
 		routeID       int
 		expectedError error
 	}{
 		{
+			name:          "successful test",
 			routeID:       1,
 			expectedError: nil,
 		},
 		{
+			name:          "no route",
 			routeID:       2,
 			expectedError: errors.New("no such route"),
 		},
@@ -283,7 +310,10 @@ func TestDeleteRouteByID(t *testing.T) {
 	}
 
 	for _, tc := range testCases {
-		err := routeman.DeleteRouteByID(tc.routeID)
-		assert.Equal(t, tc.expectedError, err)
+		tc := tc
+		t.Run(tc.name, func(t *testing.T) {
+			err := routeman.DeleteRouteByID(tc.routeID)
+			require.Equal(t, tc.expectedError, err)
+		})
 	}
 }
