@@ -10,7 +10,6 @@ import (
 
 	"github.com/JaneKetko/Buses/src/config"
 	"github.com/JaneKetko/Buses/src/routemanager"
-
 	"github.com/gorilla/mux"
 )
 
@@ -81,11 +80,6 @@ func (b *BusStation) createRoute(w http.ResponseWriter, r *http.Request) {
 
 	var rserver routeServer
 	err := json.NewDecoder(r.Body).Decode(&rserver)
-	if err != nil {
-		http.Error(w, err.Error(), http.StatusBadRequest)
-		return
-	}
-
 	if err != nil {
 		http.Error(w, err.Error(), http.StatusBadRequest)
 		return
