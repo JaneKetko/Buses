@@ -182,6 +182,9 @@ func (dbmanager *DBManager) RoutesByEndPoint(endpoint string) ([]domain.Route, e
 		routes = append(routes, route)
 	}
 
+	if len(routes) == 0 {
+		return nil, errors.New("no such routes by this endpoint")
+	}
 	return routes, nil
 }
 
