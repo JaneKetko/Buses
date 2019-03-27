@@ -21,7 +21,8 @@ type BusStation struct {
 
 //NewBusStation - constructor for BusStation.
 func NewBusStation(r *routemanager.RouteManager, c *config.Config) *BusStation {
-	return &BusStation{routes: r,
+	return &BusStation{
+		routes: r,
 		config: c,
 	}
 }
@@ -34,6 +35,7 @@ func (b *BusStation) getRoutes(w http.ResponseWriter, r *http.Request) {
 		http.Error(w, err.Error(), http.StatusInternalServerError)
 		return
 	}
+
 	rserver := make([]routeServer, 0)
 	for _, rt := range rts {
 		route := routeToRouteServer(rt)
@@ -51,11 +53,6 @@ func (b *BusStation) getRoute(w http.ResponseWriter, r *http.Request) {
 	w.Header().Set("Content-Type", "application/json")
 	params := mux.Vars(r)
 	idparam := params["id"]
-
-	if idparam == "" {
-		http.Error(w, "invalid id", http.StatusBadRequest)
-		return
-	}
 	id, err := strconv.Atoi(idparam)
 	if err != nil {
 		http.Error(w, err.Error(), http.StatusBadRequest)
@@ -77,7 +74,6 @@ func (b *BusStation) getRoute(w http.ResponseWriter, r *http.Request) {
 
 func (b *BusStation) createRoute(w http.ResponseWriter, r *http.Request) {
 	w.Header().Set("Content-Type", "application/json")
-
 	var rserver routeServer
 	err := json.NewDecoder(r.Body).Decode(&rserver)
 	if err != nil {
@@ -114,18 +110,8 @@ func (b *BusStation) deleteRoute(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	rts, err := b.routes.GetAllRoutes()
-	if err != nil {
-		http.Error(w, err.Error(), http.StatusInternalServerError)
-		return
-	}
-	rserver := make([]routeServer, 0)
-	for _, rt := range rts {
-		route := routeToRouteServer(rt)
-		rserver = append(rserver, route)
-	}
-
-	err = json.NewEncoder(w).Encode(rserver)
+	w.WriteHeader(http.StatusOK)
+	_, err = w.Write([]byte("the route was deleted successfully"))
 	if err != nil {
 		http.Error(w, err.Error(), http.StatusBadRequest)
 		return
@@ -160,15 +146,20 @@ func (b *BusStation) searchRoutes(w http.ResponseWriter, r *http.Request) {
 	}
 }
 
+func (b *BusStation) managerHandlers(router *mux.Router) *mux.Router {
+	router.HandleFunc("/route_search", b.searchRoutes).Queries("date", "{date}", "point", "{point}").
+		Methods(http.MethodGet)
+	router.HandleFunc("/routes", b.getRoutes).Methods(http.MethodGet)
+	router.HandleFunc("/routes", b.createRoute).Methods(http.MethodPost)
+	router.HandleFunc("/routes/{id}", b.getRoute).Methods(http.MethodGet)
+	router.HandleFunc("/routes/{id}", b.deleteRoute).Methods(http.MethodDelete)
+	return router
+}
+
 //StartServer - Start work with server
 func (b *BusStation) StartServer() {
 	r := mux.NewRouter()
-
 	fmt.Printf("Started server at http://localhost%v.\n", ":"+strconv.Itoa(b.config.PortServer))
-	r.HandleFunc("/route_search", b.searchRoutes).Queries("date", "{date}", "point", "{point}").Methods(http.MethodGet)
-	r.HandleFunc("/routes", b.getRoutes).Methods(http.MethodGet)
-	r.HandleFunc("/routes", b.createRoute).Methods(http.MethodPost)
-	r.HandleFunc("/routes/{id}", b.getRoute).Methods(http.MethodGet)
-	r.HandleFunc("/routes/{id}", b.deleteRoute).Methods(http.MethodDelete)
-	log.Fatal(http.ListenAndServe(":"+strconv.Itoa(b.config.PortServer), r))
+	router := b.managerHandlers(r)
+	log.Fatal(http.ListenAndServe(":"+strconv.Itoa(b.config.PortServer), router))
 }
