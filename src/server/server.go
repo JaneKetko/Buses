@@ -146,7 +146,8 @@ func (b *BusStation) searchRoutes(w http.ResponseWriter, r *http.Request) {
 	}
 }
 
-func (b *BusStation) managerHandlers(router *mux.Router) *mux.Router {
+func (b *BusStation) managerHandlers() *mux.Router {
+	router := mux.NewRouter()
 	router.HandleFunc("/route_search", b.searchRoutes).Queries("date", "{date}", "point", "{point}").
 		Methods(http.MethodGet)
 	router.HandleFunc("/routes", b.getRoutes).Methods(http.MethodGet)
@@ -158,8 +159,7 @@ func (b *BusStation) managerHandlers(router *mux.Router) *mux.Router {
 
 //StartServer - Start work with server
 func (b *BusStation) StartServer() {
-	r := mux.NewRouter()
 	fmt.Printf("Started server at http://localhost%v.\n", ":"+strconv.Itoa(b.config.PortServer))
-	router := b.managerHandlers(r)
+	router := b.managerHandlers()
 	log.Fatal(http.ListenAndServe(":"+strconv.Itoa(b.config.PortServer), router))
 }

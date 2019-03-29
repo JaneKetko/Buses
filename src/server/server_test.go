@@ -9,7 +9,6 @@ import (
 	"time"
 
 	"github.com/gavv/httpexpect"
-	"github.com/gorilla/mux"
 
 	"github.com/JaneKetko/Buses/src/config"
 	"github.com/JaneKetko/Buses/src/domain"
@@ -26,7 +25,7 @@ func TestGetRoutes(t *testing.T) {
 	routeman := routemanager.NewRouteManager(&routestrg)
 	busstation := NewBusStation(routeman, cfg)
 
-	s := busstation.managerHandlers(mux.NewRouter())
+	s := busstation.managerHandlers()
 	server := httptest.NewServer(s)
 	defer server.Close()
 	e := httpexpect.New(t, server.URL)
@@ -80,7 +79,7 @@ func TestGetRoute(t *testing.T) {
 	routeman := routemanager.NewRouteManager(&routestrg)
 	busstation := NewBusStation(routeman, cfg)
 
-	s := busstation.managerHandlers(mux.NewRouter())
+	s := busstation.managerHandlers()
 	server := httptest.NewServer(s)
 	defer server.Close()
 	e := httpexpect.New(t, server.URL)
@@ -152,7 +151,7 @@ func TestCreateRoute(t *testing.T) {
 	routeman := routemanager.NewRouteManager(&routestrg)
 	busstation := NewBusStation(routeman, cfg)
 
-	s := busstation.managerHandlers(mux.NewRouter())
+	s := busstation.managerHandlers()
 	server := httptest.NewServer(s)
 	defer server.Close()
 	e := httpexpect.New(t, server.URL)
@@ -181,21 +180,21 @@ func TestCreateRoute(t *testing.T) {
 	}
 	testCases := []struct {
 		name           string
-		route          domain.Route
+		route          *domain.Route
 		expectedStatus int
 		expectedID     int
 		expectedError  error
 	}{
 		{
 			name:           "errors",
-			route:          routes[0],
+			route:          &routes[0],
 			expectedStatus: http.StatusBadRequest,
 			expectedID:     1,
 			expectedError:  errors.New("date is invalid"),
 		},
 		{
 			name:           "successful test",
-			route:          routes[1],
+			route:          &routes[1],
 			expectedStatus: http.StatusOK,
 			expectedID:     1,
 			expectedError:  nil,
@@ -204,12 +203,7 @@ func TestCreateRoute(t *testing.T) {
 
 	for _, tc := range testCases {
 		routestrg.On("AddRoute",
-			tc.route.Points.StartPoint,
-			tc.route.Points.EndPoint,
-			tc.route.Start.Format("2006-01-02 15:04:05"),
-			tc.route.Cost,
-			tc.route.FreeSeats,
-			tc.route.AllSeats).
+			tc.route).
 			Return(tc.expectedID, tc.expectedError)
 	}
 
@@ -217,7 +211,7 @@ func TestCreateRoute(t *testing.T) {
 		tc := tc
 		t.Run(tc.name, func(t *testing.T) {
 			res := e.Request(http.MethodPost, "/routes").WithHeader("Content-Type", "application/json").
-				WithJSON(routeToRouteServer(tc.route)).Expect()
+				WithJSON(routeToRouteServer(*tc.route)).Expect()
 			res.Status(tc.expectedStatus)
 		})
 	}
@@ -231,7 +225,7 @@ func TestDeleteRoute(t *testing.T) {
 	routeman := routemanager.NewRouteManager(&routestrg)
 	busstation := NewBusStation(routeman, cfg)
 
-	s := busstation.managerHandlers(mux.NewRouter())
+	s := busstation.managerHandlers()
 	server := httptest.NewServer(s)
 	defer server.Close()
 	e := httpexpect.New(t, server.URL)
@@ -286,7 +280,7 @@ func TestSearchRoutes(t *testing.T) {
 	routeman := routemanager.NewRouteManager(&routestrg)
 	busstation := NewBusStation(routeman, cfg)
 
-	s := busstation.managerHandlers(mux.NewRouter())
+	s := busstation.managerHandlers()
 	server := httptest.NewServer(s)
 	defer server.Close()
 	e := httpexpect.New(t, server.URL)

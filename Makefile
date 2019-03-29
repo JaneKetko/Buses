@@ -25,4 +25,5 @@ lint:
 		--enable=scopelint \
 		--enable=gochecknoglobals \
 		--enable=gochecknoinits \
+		--gocyclo.min-complexity 10 \
 		./...

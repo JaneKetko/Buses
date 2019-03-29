@@ -131,7 +131,7 @@ func TestCreateNewRoute(t *testing.T) {
 		{
 			Points: domain.Points{
 				StartPoint: "Grodno",
-				EndPoint:   "Minsk",
+				EndPoint:   "Mir",
 			},
 			Start:     time.Date(2021, 04, 12, 10, 0, 0, 0, time.UTC),
 			Cost:      1000,
@@ -142,28 +142,28 @@ func TestCreateNewRoute(t *testing.T) {
 
 	testCases := []struct {
 		name          string
-		route         domain.Route
+		route         *domain.Route
 		expectedID    int
 		expectedError error
 		expTotalError error
 	}{
 		{
 			name:          "invalid date",
-			route:         routes[0],
+			route:         &routes[0],
 			expectedID:    1,
 			expectedError: nil,
 			expTotalError: errors.New("date is invalid"),
 		},
 		{
 			name:          "errors",
-			route:         routes[1],
+			route:         &routes[1],
 			expectedID:    2,
 			expectedError: errors.New("smth bad"),
 			expTotalError: errors.New("smth bad"),
 		},
 		{
 			name:          "successful test",
-			route:         routes[2],
+			route:         &routes[2],
 			expectedID:    3,
 			expectedError: nil,
 			expTotalError: nil,
@@ -172,19 +172,14 @@ func TestCreateNewRoute(t *testing.T) {
 
 	for _, tc := range testCases {
 		routestrg.On("AddRoute",
-			tc.route.Points.StartPoint,
-			tc.route.Points.EndPoint,
-			tc.route.Start.Format("2006-01-02 15:04:05"),
-			tc.route.Cost,
-			tc.route.FreeSeats,
-			tc.route.AllSeats).
+			tc.route).
 			Return(tc.expectedID, tc.expectedError)
 	}
 
 	for _, tc := range testCases {
 		tc := tc
 		t.Run(tc.name, func(t *testing.T) {
-			err := routeman.CreateNewRoute(&tc.route)
+			err := routeman.CreateNewRoute(tc.route)
 			require.Equal(t, tc.expTotalError, err)
 		})
 	}

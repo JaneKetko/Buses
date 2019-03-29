@@ -13,8 +13,7 @@ type RouteStorage interface {
 	RouteByID(id int) (*domain.Route, error)
 	DeleteRow(id int) error
 	RoutesByEndPoint(point string) ([]domain.Route, error)
-	AddRoute(startpoint, endpoint, datetime string,
-		cost, freeseats, allseats int) (int, error)
+	AddRoute(*domain.Route) (int, error)
 }
 
 //RouteManager - struct for slice of routes.
@@ -42,12 +41,7 @@ func (r *RouteManager) CreateNewRoute(route *domain.Route) error {
 	if route.Start.Before(time.Now()) {
 		return errors.New("date is invalid")
 	}
-	id, err := r.storage.AddRoute(route.Points.StartPoint,
-		route.Points.EndPoint,
-		route.Start.Format("2006-01-02 15:04:05"),
-		route.Cost,
-		route.FreeSeats,
-		route.AllSeats)
+	id, err := r.storage.AddRoute(route)
 
 	if err != nil {
 		return err
