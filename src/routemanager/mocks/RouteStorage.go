@@ -10,20 +10,20 @@ type RouteStorage struct {
 	mock.Mock
 }
 
-// AddRoute provides a mock function with given fields: startpoint, endpoint, datetime, cost, freeseats, allseats
-func (_m *RouteStorage) AddRoute(startpoint string, endpoint string, datetime string, cost int, freeseats int, allseats int) (int, error) {
-	ret := _m.Called(startpoint, endpoint, datetime, cost, freeseats, allseats)
+// AddRoute provides a mock function with given fields: _a0
+func (_m *RouteStorage) AddRoute(_a0 *domain.Route) (int, error) {
+	ret := _m.Called(_a0)
 
 	var r0 int
-	if rf, ok := ret.Get(0).(func(string, string, string, int, int, int) int); ok {
-		r0 = rf(startpoint, endpoint, datetime, cost, freeseats, allseats)
+	if rf, ok := ret.Get(0).(func(*domain.Route) int); ok {
+		r0 = rf(_a0)
 	} else {
 		r0 = ret.Get(0).(int)
 	}
 
 	var r1 error
-	if rf, ok := ret.Get(1).(func(string, string, string, int, int, int) error); ok {
-		r1 = rf(startpoint, endpoint, datetime, cost, freeseats, allseats)
+	if rf, ok := ret.Get(1).(func(*domain.Route) error); ok {
+		r1 = rf(_a0)
 	} else {
 		r1 = ret.Error(1)
 	}
