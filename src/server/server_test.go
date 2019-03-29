@@ -55,19 +55,35 @@ func TestGetRoutes(t *testing.T) {
 			expectedRoutes: routes,
 			expectedError:  nil,
 		},
+		{
+			name:           "errors",
+			expectedStatus: http.StatusInternalServerError,
+			expectedRoutes: nil,
+			expectedError:  errors.New("smth bad"),
+		},
 	}
 
-	for _, tc := range testCases {
-		routestrg.On("GetAllData").Return(tc.expectedRoutes, tc.expectedError)
-	}
+	routestrg.On("GetAllData").Return(testCases[0].expectedRoutes, testCases[0].expectedError)
 
-	for _, tc := range testCases {
-		tc := tc
-		t.Run(tc.name, func(t *testing.T) {
-			res := e.Request(http.MethodGet, "/routes").Expect()
-			res.Status(tc.expectedStatus)
-		})
-	}
+	t.Run(testCases[0].name, func(t *testing.T) {
+		res := e.Request(http.MethodGet, "/routes").Expect()
+		res.Status(testCases[0].expectedStatus)
+	})
+
+	var rtstrg mocks.RouteStorage
+	routeman = routemanager.NewRouteManager(&rtstrg)
+	busstation = NewBusStation(routeman, cfg)
+
+	s = busstation.managerHandlers()
+	server = httptest.NewServer(s)
+	defer server.Close()
+	e = httpexpect.New(t, server.URL)
+
+	rtstrg.On("GetAllData").Return(testCases[1].expectedRoutes, testCases[1].expectedError)
+	t.Run(testCases[1].name, func(t *testing.T) {
+		res := e.Request(http.MethodGet, "/routes").Expect()
+		res.Status(testCases[1].expectedStatus)
+	})
 }
 
 func TestGetRoute(t *testing.T) {
