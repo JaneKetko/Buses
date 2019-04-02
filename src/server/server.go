@@ -118,6 +118,27 @@ func (b *BusStation) deleteRoute(w http.ResponseWriter, r *http.Request) {
 	}
 }
 
+func (b *BusStation) buyTicket(w http.ResponseWriter, r *http.Request) {
+	w.Header().Set("Content-Type", "application/json")
+	params := mux.Vars(r)
+	id, err := strconv.Atoi(params["id"])
+	if err != nil {
+		http.Error(w, err.Error(), http.StatusBadRequest)
+		return
+	}
+	ticket, err := b.routes.TakePlaceInBus(id)
+	if err != nil {
+		http.Error(w, err.Error(), http.StatusInternalServerError)
+		return
+	}
+	t := convertTicket(*ticket)
+	err = json.NewEncoder(w).Encode(&t)
+	if err != nil {
+		http.Error(w, err.Error(), http.StatusBadRequest)
+		return
+	}
+}
+
 func (b *BusStation) searchRoutes(w http.ResponseWriter, r *http.Request) {
 	w.Header().Set("Content-Type", "application/json")
 	params := mux.Vars(r)
@@ -150,6 +171,7 @@ func (b *BusStation) managerHandlers() *mux.Router {
 	router := mux.NewRouter()
 	router.HandleFunc("/route_search", b.searchRoutes).Queries("date", "{date}", "point", "{point}").
 		Methods(http.MethodGet)
+	router.HandleFunc("/routes/buy/{id}", b.buyTicket).Methods(http.MethodPost)
 	router.HandleFunc("/routes", b.getRoutes).Methods(http.MethodGet)
 	router.HandleFunc("/routes", b.createRoute).Methods(http.MethodPost)
 	router.HandleFunc("/routes/{id}", b.getRoute).Methods(http.MethodGet)

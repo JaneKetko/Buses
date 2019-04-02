@@ -1,0 +1,55 @@
+syntax = "proto3";
+
+package grpcserver;
+
+import "google/protobuf/timestamp.proto";
+
+service BusesManager {
+    rpc GetRoutes(Nothing) returns (ListRoutes);
+    rpc GetRoute(IDRequest) returns (SingleRoute);
+    rpc CreateRoute(SingleRoute) returns (Nothing);
+    rpc DeleteRoute(IDRequest) returns (Nothing);
+    rpc SearchRoutes(Search) returns (ListRoutes);
+    rpc BuyTicket(IDRequest) returns (Ticket);
+}
+
+message Search {
+    google.protobuf.Timestamp Start = 1;
+    string EndPoint  = 2;
+}
+
+message Nothing {
+}
+
+message SingleRoute {
+    BusRoute route = 1;
+}
+
+message IDRequest {
+    int64 id = 1;
+}
+
+message ListRoutes {
+    repeated BusRoute BusRoutes = 1;
+}
+
+message BusRoute {
+    int64 ID               = 1; 
+	repeated RoutePoints Points     = 2;
+    google.protobuf.Timestamp Start = 3;
+	float Cost           = 4;
+	int64 FreeSeats       = 5;
+    int64 AllSeats      = 6;
+}
+
+message RoutePoints {
+    string StartPoint  = 1;
+	string EndPoint    = 2;
+}
+
+message Ticket {
+    repeated RoutePoints Points = 1;
+	google.protobuf.Timestamp Start = 2;
+	float Cost           = 3;
+	int64 Place      = 4;
+}

@@ -312,3 +312,49 @@ func TestDeleteRouteByID(t *testing.T) {
 		})
 	}
 }
+
+func TestTakePlaceInBus(t *testing.T) {
+	var routestrg mocks.RouteStorage
+	routeman := NewRouteManager(&routestrg)
+	ticket := &domain.Ticket{
+		Points: domain.Points{
+			StartPoint: "Minsk",
+			EndPoint:   "Vitebsk",
+		},
+		StartTime: time.Date(2019, 04, 23, 10, 0, 0, 0, time.UTC),
+		Cost:      1000,
+		Place:     10,
+	}
+
+	testCases := []struct {
+		name           string
+		routeID        int
+		expectedTicket *domain.Ticket
+		expectedError  error
+	}{
+		{
+			name:           "successful test",
+			routeID:        1,
+			expectedTicket: ticket,
+			expectedError:  nil,
+		},
+		{
+			name:           "errors",
+			routeID:        2,
+			expectedTicket: nil,
+			expectedError:  errors.New("no such route"),
+		},
+	}
+
+	for _, tc := range testCases {
+		routestrg.On("TakePlace", tc.routeID).Return(tc.expectedTicket, tc.expectedError)
+	}
+
+	for _, tc := range testCases {
+		tc := tc
+		t.Run(tc.name, func(t *testing.T) {
+			_, err := routeman.TakePlaceInBus(tc.routeID)
+			require.Equal(t, tc.expectedError, err)
+		})
+	}
+}

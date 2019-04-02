@@ -19,3 +19,11 @@ type Points struct {
 	StartPoint string
 	EndPoint   string
 }
+
+//Ticket - struct for storing info about taked ticket
+type Ticket struct {
+	Points    Points
+	StartTime time.Time
+	Cost      int
+	Place     int
+}

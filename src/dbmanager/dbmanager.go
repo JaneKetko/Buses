@@ -276,3 +276,46 @@ func (dbmanager *DBManager) AddRoute(r *domain.Route) (int, error) {
 	}
 	return int(idRoute), nil
 }
+
+//TakePlace takes one place in bus
+func (dbmanager *DBManager) TakePlace(id int) (*domain.Ticket, error) {
+	row, err := dbmanager.db.Query(`SELECT r.id_route, r.starttime, r.cost, r.freeseats, r.allseats, 
+	p.id_points, p.startpoint, p.endpoint 
+	FROM route r JOIN points p on r.id_points = p.id_points WHERE r.id_route=?`, id)
+	if err != nil {
+		return nil, errors.New("data hasn't read")
+	}
+
+	if !row.Next() {
+		return nil, errors.New("no such route")
+	}
+	var routeDB RouteDB
+	err = row.Scan(&routeDB.idRoute, &routeDB.startTime, &routeDB.cost, &routeDB.freeSeats,
+		&routeDB.allSeats, &routeDB.idPoint, &routeDB.startPoint, &routeDB.endPoint)
+	if err != nil {
+		return nil, errors.New("something is wrong")
+	}
+	route, err := convertTypes(routeDB)
+	if err != nil {
+		return nil, errors.New("errors with types")
+	}
+
+	if route.FreeSeats == 0 {
+		return nil, errors.New("no free seats in this bus")
+	}
+	_, err = dbmanager.db.Query("UPDATE route SET freeseats = freeseats - 1 where id_route=?", id)
+	if err != nil {
+		return nil, err
+	}
+
+	ticket := &domain.Ticket{
+		Points: domain.Points{
+			StartPoint: route.Points.StartPoint,
+			EndPoint:   route.Points.EndPoint},
+		StartTime: route.Start,
+		Cost:      route.Cost,
+		Place:     route.AllSeats - route.FreeSeats + 1,
+	}
+
+	return ticket, nil
+}

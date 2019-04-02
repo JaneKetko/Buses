@@ -22,11 +22,30 @@ type PointsServer struct {
 	EndPoint   string `json:"endpoint"`
 }
 
+type ticketServer struct {
+	Points PointsServer `json:"route"`
+	Start  time.Time    `json:"start_time"`
+	Cost   float32      `json:"cost"`
+	Place  int          `json:"place"`
+}
+
+func convertTicket(t domain.Ticket) ticketServer {
+	cost := float32(t.Cost) / 100
+	ticket := ticketServer{
+		Points: PointsServer{
+			StartPoint: t.Points.StartPoint,
+			EndPoint:   t.Points.EndPoint},
+		Start: t.StartTime,
+		Cost:  cost,
+		Place: t.Place,
+	}
+	return ticket
+}
+
 //routeServerToRoute convert routeServer to Route
 func routeServerToRoute(rServer routeServer) domain.Route {
-	var route domain.Route
 	cost := int(rServer.Cost * 100)
-	route = domain.Route{
+	route := domain.Route{
 		ID: rServer.ID,
 		Points: domain.Points{
 			StartPoint: rServer.Points.StartPoint,
@@ -41,9 +60,8 @@ func routeServerToRoute(rServer routeServer) domain.Route {
 
 //routeToRouteServer convert Route to routeServer
 func routeToRouteServer(r domain.Route) routeServer {
-	var route routeServer
 	cost := float32(r.Cost) / 100
-	route = routeServer{
+	route := routeServer{
 		ID: r.ID,
 		Points: PointsServer{
 			StartPoint: r.Points.StartPoint,

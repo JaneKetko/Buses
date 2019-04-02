@@ -14,6 +14,7 @@ type RouteStorage interface {
 	DeleteRow(id int) error
 	RoutesByEndPoint(point string) ([]domain.Route, error)
 	AddRoute(*domain.Route) (int, error)
+	TakePlace(id int) (*domain.Ticket, error)
 }
 
 //RouteManager - struct for slice of routes.
@@ -74,4 +75,9 @@ func (r RouteManager) ChooseRoutesByDateAndPoint(date time.Time, endpoint string
 		return nil, errors.New("no such routes")
 	}
 	return routesDate, nil
+}
+
+//TakePlaceInBus takes one place in bus by client
+func (r RouteManager) TakePlaceInBus(id int) (*domain.Ticket, error) {
+	return r.storage.TakePlace(id)
 }

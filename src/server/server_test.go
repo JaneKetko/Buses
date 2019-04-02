@@ -384,3 +384,74 @@ func TestSearchRoutes(t *testing.T) {
 		})
 	}
 }
+
+func TestBuyTicket(t *testing.T) {
+	cfg := &config.Config{
+		PortServer: 8000,
+	}
+	var routestrg mocks.RouteStorage
+	routeman := routemanager.NewRouteManager(&routestrg)
+	busstation := NewBusStation(routeman, cfg)
+
+	s := busstation.managerHandlers()
+	server := httptest.NewServer(s)
+	defer server.Close()
+
+	e := httpexpect.New(t, server.URL)
+
+	ticket := &domain.Ticket{
+		Points: domain.Points{
+			StartPoint: "Minsk",
+			EndPoint:   "Vitebsk",
+		},
+		StartTime: time.Date(2019, 04, 23, 10, 0, 0, 0, time.UTC),
+		Cost:      1000,
+		Place:     10,
+	}
+
+	testCases := []struct {
+		name           string
+		routeID        int
+		paramID        string
+		expectedTicket *domain.Ticket
+		expectedError  error
+		expectedStatus int
+	}{
+		{
+			name:           "successful test",
+			routeID:        1,
+			paramID:        "1",
+			expectedTicket: ticket,
+			expectedError:  nil,
+			expectedStatus: http.StatusOK,
+		},
+		{
+			name:           "invalid id",
+			routeID:        1,
+			paramID:        "sdvsd",
+			expectedTicket: ticket,
+			expectedError:  nil,
+			expectedStatus: http.StatusBadRequest,
+		},
+		{
+			name:           "errors",
+			routeID:        2,
+			paramID:        "2",
+			expectedTicket: nil,
+			expectedError:  errors.New("no such route"),
+			expectedStatus: http.StatusInternalServerError,
+		},
+	}
+
+	for _, tc := range testCases {
+		routestrg.On("TakePlace", tc.routeID).Return(tc.expectedTicket, tc.expectedError)
+	}
+
+	for _, tc := range testCases {
+		tc := tc
+		t.Run(tc.name, func(t *testing.T) {
+			res := e.Request(http.MethodPost, "/routes/buy/"+tc.paramID).Expect()
+			res.Status(tc.expectedStatus)
+		})
+	}
+}

@@ -200,3 +200,50 @@ func TestFindRoute(t *testing.T) {
 	_, err = db.Exec("DELETE FROM route where id_route in (?, ?, ?)", id1, id2, id3)
 	assert.NoError(t, err)
 }
+
+func TestTakePlace(t *testing.T) {
+	db, err := dbOpen()
+	require.NoError(t, err)
+	dbmanager := NewDBManager(db)
+	routes := []domain.Route{
+		{
+			ID: 1,
+			Points: domain.Points{
+				StartPoint: "Minsk",
+				EndPoint:   "Vitebsk",
+			},
+			Start:     time.Date(2019, 04, 23, 10, 0, 0, 0, time.UTC),
+			Cost:      1000,
+			FreeSeats: 12,
+			AllSeats:  13,
+		},
+		{
+			Points: domain.Points{
+				StartPoint: "Minsk",
+				EndPoint:   "Vitebsk",
+			},
+			Start:     time.Date(2019, 02, 12, 10, 0, 0, 0, time.UTC),
+			Cost:      1000,
+			FreeSeats: 0,
+			AllSeats:  13,
+		},
+	}
+	id1, err := dbmanager.AddRoute(&routes[0])
+	require.NoError(t, err)
+	id2, err := dbmanager.AddRoute(&routes[1])
+	require.NoError(t, err)
+
+	_, err = dbmanager.TakePlace(id1)
+	assert.NoError(t, err)
+	_, err = dbmanager.TakePlace(id2)
+	assert.EqualError(t, err, "no free seats in this bus")
+
+	_, err = dbmanager.TakePlace(10000000000)
+	assert.EqualError(t, err, "no such route")
+
+	_, err = db.Exec("DELETE FROM route where id_route=?", id1)
+	assert.NoError(t, err)
+
+	_, err = db.Exec("DELETE FROM route where id_route=?", id2)
+	assert.NoError(t, err)
+}
