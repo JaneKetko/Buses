@@ -4,6 +4,14 @@ import (
 	"time"
 )
 
+const (
+	ErrNoFreeSeats        = "no free seats in this bus"
+	ErrNoRoutes           = "no such route"
+	ErrTypes              = "errors with types"
+	ErrNoRoutesByEndPoint = "no such routes by this endpoint"
+	ErrInvalidDate        = "invalid date argument"
+)
+
 //Route - struct for describing route of any bus.
 type Route struct {
 	ID        int

@@ -1,6 +1,6 @@
 syntax = "proto3";
 
-package grpcserver;
+package proto;
 
 import "google/protobuf/timestamp.proto";
 
@@ -10,11 +10,11 @@ service BusesManager {
     rpc CreateRoute(SingleRoute) returns (Nothing);
     rpc DeleteRoute(IDRequest) returns (Nothing);
     rpc SearchRoutes(Search) returns (ListRoutes);
-    rpc BuyTicket(IDRequest) returns (Ticket);
+    rpc BuyTicket(IDRequest) returns (TicketResponse);
 }
 
 message Search {
-    google.protobuf.Timestamp Start = 1;
+    string Start = 1;
     string EndPoint  = 2;
 }
 
@@ -22,11 +22,11 @@ message Nothing {
 }
 
 message SingleRoute {
-    BusRoute route = 1;
+    BusRoute Route = 1;
 }
 
 message IDRequest {
-    int64 id = 1;
+    int64 ID = 1;
 }
 
 message ListRoutes {
@@ -35,9 +35,9 @@ message ListRoutes {
 
 message BusRoute {
     int64 ID               = 1; 
-	repeated RoutePoints Points     = 2;
+	RoutePoints Points     = 2;
     google.protobuf.Timestamp Start = 3;
-	float Cost           = 4;
+	int64 Cost           = 4;
 	int64 FreeSeats       = 5;
     int64 AllSeats      = 6;
 }
@@ -47,9 +47,13 @@ message RoutePoints {
 	string EndPoint    = 2;
 }
 
+message TicketResponse{
+    Ticket Ticket = 1;
+}
+
 message Ticket {
-    repeated RoutePoints Points = 1;
+    RoutePoints Points = 1;
 	google.protobuf.Timestamp Start = 2;
-	float Cost           = 3;
+	int64 Cost           = 3;
 	int64 Place      = 4;
 }

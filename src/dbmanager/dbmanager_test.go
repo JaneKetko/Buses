@@ -3,6 +3,7 @@
 package dbmanager
 
 import (
+	"context"
 	"database/sql"
 	"testing"
 	"time"
@@ -37,12 +38,12 @@ func TestRouteID(t *testing.T) {
 	db, err := dbOpen()
 	require.NoError(t, err)
 	dbmanager := NewDBManager(db)
-	id1, err := dbmanager.insertRoute(7, 32, 44, 1500, "2019-02-24 08:30:00")
+	id1, err := dbmanager.insertRoute(context.Background(), 7, 32, 44, 1500, "2019-02-24 08:30:00")
 	require.NoError(t, err)
-	_, err = dbmanager.insertRoute(7, 32, 44, 1520, "02-24 08:30:00")
+	_, err = dbmanager.insertRoute(context.Background(), 7, 32, 44, 1520, "02-24 08:30:00")
 	require.Error(t, err, "invalid format of date")
 
-	_, err = dbmanager.RouteByID(int(id1))
+	_, err = dbmanager.RouteByID(context.Background(), int(id1))
 	assert.NoError(t, err)
 
 	_, err = db.Exec("DELETE FROM route where id_route=?", id1)
@@ -77,13 +78,13 @@ func TestAddRoute(t *testing.T) {
 	require.NoError(t, err)
 	dbmanager := NewDBManager(db)
 
-	id, err := dbmanager.AddRoute(&routes[0])
+	id, err := dbmanager.AddRoute(context.Background(), &routes[0])
 	require.NoError(t, err)
 
 	_, err = db.Exec("DELETE FROM route where id_route=?", id)
 	assert.NoError(t, err)
 
-	id, err = dbmanager.AddRoute(&routes[1])
+	id, err = dbmanager.AddRoute(context.Background(), &routes[1])
 	require.NoError(t, err)
 	_, err = db.Exec("DELETE FROM points where startpoint=? && endpoint=?", "Minsk", "Lida")
 	assert.NoError(t, err)
@@ -107,20 +108,23 @@ func TestGetAllData(t *testing.T) {
 		FreeSeats: 12,
 		AllSeats:  13,
 	}
-	id1, err := dbmanager.AddRoute(&route)
+	id1, err := dbmanager.AddRoute(context.Background(), &route)
 	require.NoError(t, err)
-	id2, err := dbmanager.AddRoute(&route)
+	id2, err := dbmanager.AddRoute(context.Background(), &route)
 	require.NoError(t, err)
-	id3, err := dbmanager.AddRoute(&route)
+	id3, err := dbmanager.AddRoute(context.Background(), &route)
 	require.NoError(t, err)
 
-	routes, err := dbmanager.GetAllData()
+	routes, err := dbmanager.GetAllData(context.Background())
 	assert.NoError(t, err)
 
 	assert.Equal(t, 3, len(routes))
 
 	_, err = db.Exec("DELETE FROM route where id_route in (?, ?, ?)", id1, id2, id3)
 	assert.NoError(t, err)
+
+	_, err = dbmanager.GetAllData(context.Background())
+	assert.EqualError(t, err, domain.ErrNoRoutes)
 }
 
 func TestDeleteRoute(t *testing.T) {
@@ -138,14 +142,12 @@ func TestDeleteRoute(t *testing.T) {
 		FreeSeats: 12,
 		AllSeats:  13,
 	}
-	id, err := dbmanager.AddRoute(&route)
+	id, err := dbmanager.AddRoute(context.Background(), &route)
 	require.NoError(t, err)
-	err = dbmanager.DeleteRow(id)
+	err = dbmanager.DeleteRow(context.Background(), id)
 	require.NoError(t, err)
-
-	_, err = dbmanager.RouteByID(id)
-
-	assert.EqualError(t, err, "no such route")
+	err = dbmanager.DeleteRow(context.Background(), id)
+	require.EqualError(t, err, domain.ErrNoRoutes)
 }
 
 func TestFindRoute(t *testing.T) {
@@ -186,19 +188,22 @@ func TestFindRoute(t *testing.T) {
 			AllSeats:  13,
 		},
 	}
-	id1, err := dbmanager.AddRoute(&routes[0])
+	id1, err := dbmanager.AddRoute(context.Background(), &routes[0])
 	require.NoError(t, err)
-	id2, err := dbmanager.AddRoute(&routes[1])
+	id2, err := dbmanager.AddRoute(context.Background(), &routes[1])
 	require.NoError(t, err)
-	id3, err := dbmanager.AddRoute(&routes[2])
+	id3, err := dbmanager.AddRoute(context.Background(), &routes[2])
 	require.NoError(t, err)
 
-	rts, err := dbmanager.RoutesByEndPoint("Vitebsk")
+	rts, err := dbmanager.RoutesByEndPoint(context.Background(), "Vitebsk")
 	assert.NoError(t, err)
 
 	assert.Equal(t, 2, len(rts))
 	_, err = db.Exec("DELETE FROM route where id_route in (?, ?, ?)", id1, id2, id3)
 	assert.NoError(t, err)
+
+	_, err = dbmanager.RoutesByEndPoint(context.Background(), "sdsvds")
+	assert.EqualError(t, err, domain.ErrNoRoutesByEndPoint)
 }
 
 func TestTakePlace(t *testing.T) {
@@ -228,18 +233,18 @@ func TestTakePlace(t *testing.T) {
 			AllSeats:  13,
 		},
 	}
-	id1, err := dbmanager.AddRoute(&routes[0])
+	id1, err := dbmanager.AddRoute(context.Background(), &routes[0])
 	require.NoError(t, err)
-	id2, err := dbmanager.AddRoute(&routes[1])
+	id2, err := dbmanager.AddRoute(context.Background(), &routes[1])
 	require.NoError(t, err)
 
-	_, err = dbmanager.TakePlace(id1)
+	_, err = dbmanager.TakePlace(context.Background(), id1)
 	assert.NoError(t, err)
-	_, err = dbmanager.TakePlace(id2)
-	assert.EqualError(t, err, "no free seats in this bus")
+	_, err = dbmanager.TakePlace(context.Background(), id2)
+	assert.EqualError(t, err, domain.ErrNoFreeSeats)
 
-	_, err = dbmanager.TakePlace(10000000000)
-	assert.EqualError(t, err, "no such route")
+	_, err = dbmanager.TakePlace(context.Background(), 10000000000)
+	assert.EqualError(t, err, domain.ErrNoRoutes)
 
 	_, err = db.Exec("DELETE FROM route where id_route=?", id1)
 	assert.NoError(t, err)

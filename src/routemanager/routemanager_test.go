@@ -1,6 +1,7 @@
 package routemanager
 
 import (
+	"context"
 	"errors"
 	"testing"
 	"time"
@@ -12,6 +13,9 @@ import (
 )
 
 func TestRoutesByEndPoint(t *testing.T) {
+
+	ctx := context.Background()
+
 	routes := []domain.Route{
 		{
 			ID: 1,
@@ -74,9 +78,9 @@ func TestRoutesByEndPoint(t *testing.T) {
 			date:           time.Date(2019, 04, 10, 10, 0, 0, 0, time.UTC),
 			endPoint:       "Grodno",
 			expectedRoutes: nil,
-			expectedError:  errors.New("no such routes by this endpoint"),
+			expectedError:  errors.New(domain.ErrNoRoutesByEndPoint),
 			expTotalRoutes: nil,
-			expTotalError:  errors.New("no such routes by this endpoint"),
+			expTotalError:  errors.New(domain.ErrNoRoutesByEndPoint),
 		},
 		{
 			name:           "no routes by date",
@@ -85,25 +89,27 @@ func TestRoutesByEndPoint(t *testing.T) {
 			expectedRoutes: routes[2:],
 			expectedError:  nil,
 			expTotalRoutes: nil,
-			expTotalError:  errors.New("no such routes"),
+			expTotalError:  errors.New(domain.ErrNoRoutes),
 		},
 	}
 
 	for _, tc := range testCases {
-		routestrg.On("RoutesByEndPoint", tc.endPoint).Return(tc.expectedRoutes, tc.expectedError)
+		routestrg.On("RoutesByEndPoint", ctx, tc.endPoint).Return(tc.expectedRoutes, tc.expectedError)
 	}
 
 	for _, tc := range testCases {
 		tc := tc
 		t.Run(tc.name, func(t *testing.T) {
-			rt, err := routeman.ChooseRoutesByDateAndPoint(tc.date, tc.endPoint)
+			rt, err := routeman.SearchRoutes(ctx, tc.date, tc.endPoint)
 			require.Equal(t, tc.expTotalError, err)
 			assert.Equal(t, tc.expTotalRoutes, rt)
 		})
 	}
+	routestrg.AssertExpectations(t)
 }
 
 func TestCreateNewRoute(t *testing.T) {
+	ctx := context.Background()
 	var routestrg mocks.RouteStorage
 	routeman := NewRouteManager(&routestrg)
 
@@ -152,7 +158,7 @@ func TestCreateNewRoute(t *testing.T) {
 			route:         &routes[0],
 			expectedID:    1,
 			expectedError: nil,
-			expTotalError: errors.New("date is invalid"),
+			expTotalError: errors.New(domain.ErrInvalidDate),
 		},
 		{
 			name:          "errors",
@@ -171,7 +177,7 @@ func TestCreateNewRoute(t *testing.T) {
 	}
 
 	for _, tc := range testCases {
-		routestrg.On("AddRoute",
+		routestrg.On("AddRoute", ctx,
 			tc.route).
 			Return(tc.expectedID, tc.expectedError)
 	}
@@ -179,10 +185,11 @@ func TestCreateNewRoute(t *testing.T) {
 	for _, tc := range testCases {
 		tc := tc
 		t.Run(tc.name, func(t *testing.T) {
-			err := routeman.CreateNewRoute(tc.route)
-			require.Equal(t, tc.expTotalError, err)
+			err := routeman.CreateRoute(ctx, tc.route)
+			assert.Equal(t, tc.expTotalError, err)
 		})
 	}
+	routestrg.AssertExpectations(t)
 }
 
 func TestGetAllRoutes(t *testing.T) {
@@ -199,6 +206,7 @@ func TestGetAllRoutes(t *testing.T) {
 			AllSeats:  13,
 		},
 	}
+	ctx := context.Background()
 	var routestrg mocks.RouteStorage
 	routeman := NewRouteManager(&routestrg)
 
@@ -215,17 +223,18 @@ func TestGetAllRoutes(t *testing.T) {
 	}
 
 	for _, tc := range testCases {
-		routestrg.On("GetAllData").Return(tc.expectedRoutes, tc.expectedError)
+		routestrg.On("GetAllData", ctx).Return(tc.expectedRoutes, tc.expectedError)
 	}
 
 	for _, tc := range testCases {
 		tc := tc
 		t.Run(tc.name, func(t *testing.T) {
-			rt, err := routeman.GetAllRoutes()
+			rt, err := routeman.GetRoutes(ctx)
 			require.Equal(t, tc.expectedError, err)
 			assert.Equal(t, tc.expectedRoutes, rt)
 		})
 	}
+	routestrg.AssertExpectations(t)
 }
 
 func TestGetRouteByID(t *testing.T) {
@@ -242,6 +251,7 @@ func TestGetRouteByID(t *testing.T) {
 			AllSeats:  13,
 		},
 	}
+	ctx := context.Background()
 	var routestrg mocks.RouteStorage
 	routeman := NewRouteManager(&routestrg)
 
@@ -261,25 +271,27 @@ func TestGetRouteByID(t *testing.T) {
 			name:          "no route",
 			routeID:       2,
 			expectedRoute: nil,
-			expectedError: errors.New("no such route"),
+			expectedError: errors.New(domain.ErrNoRoutes),
 		},
 	}
 
 	for _, tc := range testCases {
-		routestrg.On("RouteByID", tc.routeID).Return(tc.expectedRoute, tc.expectedError)
+		routestrg.On("RouteByID", ctx, tc.routeID).Return(tc.expectedRoute, tc.expectedError)
 	}
 
 	for _, tc := range testCases {
 		tc := tc
 		t.Run(tc.name, func(t *testing.T) {
-			rt, err := routeman.GetRouteByID(tc.routeID)
+			rt, err := routeman.GetRouteByID(ctx, tc.routeID)
 			require.Equal(t, tc.expectedError, err)
 			assert.Equal(t, tc.expectedRoute, rt)
 		})
 	}
+	routestrg.AssertExpectations(t)
 }
 
 func TestDeleteRouteByID(t *testing.T) {
+	ctx := context.Background()
 	var routestrg mocks.RouteStorage
 	routeman := NewRouteManager(&routestrg)
 
@@ -296,24 +308,26 @@ func TestDeleteRouteByID(t *testing.T) {
 		{
 			name:          "no route",
 			routeID:       2,
-			expectedError: errors.New("no such route"),
+			expectedError: errors.New(domain.ErrNoRoutes),
 		},
 	}
 
 	for _, tc := range testCases {
-		routestrg.On("DeleteRow", tc.routeID).Return(tc.expectedError)
+		routestrg.On("DeleteRow", ctx, tc.routeID).Return(tc.expectedError)
 	}
 
 	for _, tc := range testCases {
 		tc := tc
 		t.Run(tc.name, func(t *testing.T) {
-			err := routeman.DeleteRouteByID(tc.routeID)
+			err := routeman.DeleteRoute(ctx, tc.routeID)
 			require.Equal(t, tc.expectedError, err)
 		})
 	}
+	routestrg.AssertExpectations(t)
 }
 
 func TestTakePlaceInBus(t *testing.T) {
+	ctx := context.Background()
 	var routestrg mocks.RouteStorage
 	routeman := NewRouteManager(&routestrg)
 	ticket := &domain.Ticket{
@@ -342,19 +356,20 @@ func TestTakePlaceInBus(t *testing.T) {
 			name:           "errors",
 			routeID:        2,
 			expectedTicket: nil,
-			expectedError:  errors.New("no such route"),
+			expectedError:  errors.New(domain.ErrNoRoutes),
 		},
 	}
 
 	for _, tc := range testCases {
-		routestrg.On("TakePlace", tc.routeID).Return(tc.expectedTicket, tc.expectedError)
+		routestrg.On("TakePlace", ctx, tc.routeID).Return(tc.expectedTicket, tc.expectedError)
 	}
 
 	for _, tc := range testCases {
 		tc := tc
 		t.Run(tc.name, func(t *testing.T) {
-			_, err := routeman.TakePlaceInBus(tc.routeID)
+			_, err := routeman.BuyTicket(ctx, tc.routeID)
 			require.Equal(t, tc.expectedError, err)
 		})
 	}
+	routestrg.AssertExpectations(t)
 }
