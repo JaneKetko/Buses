@@ -2,7 +2,6 @@ package grpcserver
 
 import (
 	"context"
-	"errors"
 	"log"
 	"net"
 	"time"
@@ -18,11 +17,13 @@ import (
 	"github.com/golang/protobuf/ptypes"
 )
 
+//Server - struct for server.
 type Server struct {
 	manager *routemanager.RouteManager
 	config  *config.Config
 }
 
+//NewServer - init server.
 func NewServer(r *routemanager.RouteManager, c *config.Config) *Server {
 	return &Server{
 		manager: r,
@@ -30,17 +31,21 @@ func NewServer(r *routemanager.RouteManager, c *config.Config) *Server {
 	}
 }
 
-func (s *Server) RunServer(address string) {
-	lis, err := net.Listen("tcp", address)
+//RunServer - start serving.
+func (s *Server) RunServer() {
+
+	lis, err := net.Listen("tcp", s.config.PortServer)
 	if err != nil {
 		log.Fatalf("failed to listen: %v", err)
 	}
 	srv := grpc.NewServer()
 	pb.RegisterBusesManagerServer(srv, s)
 	reflection.Register(srv)
+	log.Println("Started server...")
 	if err := srv.Serve(lis); err != nil {
 		log.Fatalf("errors with serving: %v", err)
 	}
+
 }
 
 func (s *Server) convertTypes(route domain.Route) (*pb.BusRoute, error) {
@@ -62,6 +67,7 @@ func (s *Server) convertTypes(route domain.Route) (*pb.BusRoute, error) {
 	return busroute, nil
 }
 
+//GetRoutes - get all routes.
 func (s *Server) GetRoutes(ctx context.Context, in *pb.Nothing) (*pb.ListRoutes, error) {
 	routes, err := s.manager.GetRoutes(ctx)
 	if err != nil {
@@ -80,6 +86,7 @@ func (s *Server) GetRoutes(ctx context.Context, in *pb.Nothing) (*pb.ListRoutes,
 	return &pb.ListRoutes{BusRoutes: busrt}, nil
 }
 
+//GetRoute - get route by id.
 func (s *Server) GetRoute(ctx context.Context, in *pb.IDRequest) (*pb.SingleRoute, error) {
 	route, err := s.manager.GetRouteByID(ctx, int(in.ID))
 	if err != nil {
@@ -94,6 +101,7 @@ func (s *Server) GetRoute(ctx context.Context, in *pb.IDRequest) (*pb.SingleRout
 	return &pb.SingleRoute{Route: busroute}, nil
 }
 
+//CreateRoute - create route.
 func (s *Server) CreateRoute(ctx context.Context, in *pb.SingleRoute) (*pb.Nothing, error) {
 	date, err := ptypes.Timestamp(in.Route.Start)
 	if err != nil {
@@ -120,6 +128,7 @@ func (s *Server) CreateRoute(ctx context.Context, in *pb.SingleRoute) (*pb.Nothi
 	return &pb.Nothing{}, nil
 }
 
+//DeleteRoute - delete route by id.
 func (s *Server) DeleteRoute(ctx context.Context, in *pb.IDRequest) (*pb.Nothing, error) {
 	err := s.manager.DeleteRoute(ctx, int(in.ID))
 	if err != nil {
@@ -129,6 +138,7 @@ func (s *Server) DeleteRoute(ctx context.Context, in *pb.IDRequest) (*pb.Nothing
 	return &pb.Nothing{}, nil
 }
 
+//BuyTicket - buy ticket for one route.
 func (s *Server) BuyTicket(ctx context.Context, in *pb.IDRequest) (*pb.TicketResponse, error) {
 	tick, err := s.manager.BuyTicket(ctx, int(in.ID))
 	if err != nil {
@@ -153,10 +163,11 @@ func (s *Server) BuyTicket(ctx context.Context, in *pb.IDRequest) (*pb.TicketRes
 	return &pb.TicketResponse{Ticket: ticket}, nil
 }
 
+//SearchRoutes - search routes with datetime and endpoint.
 func (s *Server) SearchRoutes(ctx context.Context, in *pb.Search) (*pb.ListRoutes, error) {
-	date, err := time.Parse("2006-01-02", in.Start)
+	date, err := time.Parse("2006-01-02", in.StartTime)
 	if err != nil {
-		return nil, errors.New(domain.ErrInvalidDate)
+		return nil, domain.ErrInvalidDate
 	}
 	routes, err := s.manager.SearchRoutes(ctx, date, in.EndPoint)
 	if err != nil {

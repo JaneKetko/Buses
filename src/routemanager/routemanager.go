@@ -2,7 +2,6 @@ package routemanager
 
 import (
 	"context"
-	"errors"
 	"time"
 
 	"github.com/JaneKetko/Buses/src/domain"
@@ -28,7 +27,7 @@ func NewRouteManager(storage RouteStorage) *RouteManager {
 	return &RouteManager{storage: storage}
 }
 
-//GetAllRoutes gets all routes.
+//GetRoutes gets all routes.
 func (r RouteManager) GetRoutes(ctx context.Context) ([]domain.Route, error) {
 	return r.storage.GetAllData(ctx)
 }
@@ -38,10 +37,10 @@ func (r RouteManager) GetRouteByID(ctx context.Context, id int) (*domain.Route, 
 	return r.storage.RouteByID(ctx, id)
 }
 
-//CreateNewRoute creates new route in database.
+//CreateRoute creates new route in database.
 func (r *RouteManager) CreateRoute(ctx context.Context, route *domain.Route) error {
 	if route.Start.Before(time.Now()) {
-		return errors.New(domain.ErrInvalidDate)
+		return domain.ErrInvalidDate
 	}
 	id, err := r.storage.AddRoute(ctx, route)
 
@@ -52,12 +51,12 @@ func (r *RouteManager) CreateRoute(ctx context.Context, route *domain.Route) err
 	return nil
 }
 
-//DeleteRouteByID deletes route from all routes by id.
+//DeleteRoute deletes route from all routes by id.
 func (r *RouteManager) DeleteRoute(ctx context.Context, id int) error {
 	return r.storage.DeleteRow(ctx, id)
 }
 
-//ChooseRoutesByDateAndPoint chooses routes by date and point.
+//SearchRoutes chooses routes by date and point.
 func (r RouteManager) SearchRoutes(ctx context.Context,
 	date time.Time, endpoint string) ([]domain.Route, error) {
 
@@ -74,12 +73,12 @@ func (r RouteManager) SearchRoutes(ctx context.Context,
 		}
 	}
 	if len(routesDate) == 0 {
-		return nil, errors.New(domain.ErrNoRoutes)
+		return nil, domain.ErrNoRoutes
 	}
 	return routesDate, nil
 }
 
-//TakePlaceInBus takes one place in bus by client
+//BuyTicket takes one place in bus by client
 func (r RouteManager) BuyTicket(ctx context.Context, id int) (*domain.Ticket, error) {
 	return r.storage.TakePlace(ctx, id)
 }

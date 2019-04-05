@@ -6,7 +6,7 @@ import (
 
 //Config - struct for project info.
 type Config struct {
-	PortServer int    `default:"8000"`
+	PortServer string `default:":8000"`
 	Login      string `default:"root"`
 	Passwd     string `default:"root"`
 	Hostname   string `default:"172.17.0.2"`

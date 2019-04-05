@@ -88,14 +88,14 @@ func (dbmanager *DBManager) GetAllData(ctx context.Context) ([]domain.Route, err
 		}
 		route, err := convertTypes(dbr)
 		if err != nil {
-			return nil, errors.New(domain.ErrTypes)
+			return nil, domain.ErrTypes
 		}
 
 		routes = append(routes, route)
 	}
 
 	if len(routes) == 0 {
-		return nil, errors.New(domain.ErrNoRoutes)
+		return nil, domain.ErrNoRoutes
 	}
 
 	return routes, nil
@@ -112,7 +112,7 @@ func (dbmanager *DBManager) RouteByID(ctx context.Context, id int) (*domain.Rout
 			&routeDB.allSeats, &routeDB.idPoint, &routeDB.startPoint, &routeDB.endPoint)
 
 	if err != nil {
-		return nil, errors.New(domain.ErrNoRoutes)
+		return nil, domain.ErrNoRoutes
 	}
 
 	route, err := convertTypes(routeDB)
@@ -136,7 +136,7 @@ func (dbmanager *DBManager) DeleteRow(ctx context.Context, id int) error {
 	}
 
 	if n == 0 {
-		return errors.New(domain.ErrNoRoutes)
+		return domain.ErrNoRoutes
 	}
 	return nil
 }
@@ -162,13 +162,13 @@ func (dbmanager *DBManager) RoutesByEndPoint(ctx context.Context, endpoint strin
 		}
 		route, err := convertTypes(dbr)
 		if err != nil {
-			return nil, errors.New(domain.ErrTypes)
+			return nil, domain.ErrTypes
 		}
 		routes = append(routes, route)
 	}
 
 	if len(routes) == 0 {
-		return nil, errors.New(domain.ErrNoRoutesByEndPoint)
+		return nil, domain.ErrNoRoutesByEndPoint
 	}
 	return routes, nil
 }
@@ -189,16 +189,23 @@ func (dbmanager *DBManager) insertPoint(ctx context.Context, startpoint, endpoin
 	return pointID, nil
 }
 
-func (dbmanager *DBManager) insertRoute(ctx context.Context, id, freeseats, allseats,
-	cost int, datetime string) (int64, error) {
+type insertRouteStorage struct {
+	ID        int
+	FreeSeats int
+	AllSeats  int
+	Cost      int
+	DateTime  string
+}
 
-	date, err := time.Parse("2006-01-02 15:04:05", datetime)
+func (dbmanager *DBManager) insertRoute(ctx context.Context, rtinfo *insertRouteStorage) (int64, error) {
+
+	date, err := time.Parse("2006-01-02 15:04:05", rtinfo.DateTime)
 	if err != nil {
 		return 0, err
 	}
 
 	res, err := dbmanager.db.ExecContext(ctx, `INSERT INTO route (id_points, starttime, cost, freeseats, allseats)
-	VALUES( ?, ?, ?, ?, ? )`, id, date, cost, freeseats, allseats)
+	VALUES( ?, ?, ?, ?, ? )`, rtinfo.ID, date, rtinfo.Cost, rtinfo.FreeSeats, rtinfo.AllSeats)
 
 	if err != nil {
 		return 0, errors.New("cannot insert route")
@@ -233,8 +240,14 @@ func (dbmanager *DBManager) AddRoute(ctx context.Context, r *domain.Route) (int,
 			return 0, err
 		}
 	}
-	idRoute, err := dbmanager.insertRoute(ctx, int(pointID), r.FreeSeats, r.AllSeats,
-		r.Cost, r.Start.Format("2006-01-02 15:04:05"))
+	idRoute, err := dbmanager.insertRoute(ctx, &insertRouteStorage{
+		ID:        int(pointID),
+		FreeSeats: r.FreeSeats,
+		AllSeats:  r.AllSeats,
+		Cost:      r.Cost,
+		DateTime:  r.Start.Format("2006-01-02 15:04:05"),
+	})
+
 	if err != nil {
 		return 0, err
 	}
@@ -252,16 +265,16 @@ func (dbmanager *DBManager) TakePlace(ctx context.Context, id int) (*domain.Tick
 			&routeDB.allSeats, &routeDB.idPoint, &routeDB.startPoint, &routeDB.endPoint)
 
 	if err != nil {
-		return nil, errors.New(domain.ErrNoRoutes)
+		return nil, domain.ErrNoRoutes
 	}
 
 	route, err := convertTypes(routeDB)
 	if err != nil {
-		return nil, errors.New(domain.ErrTypes)
+		return nil, domain.ErrTypes
 	}
 
 	if route.FreeSeats == 0 {
-		return nil, errors.New(domain.ErrNoFreeSeats)
+		return nil, domain.ErrNoFreeSeats
 	}
 	_, err = dbmanager.db.Query("UPDATE route SET freeseats = freeseats - 1 where id_route=?", id)
 	if err != nil {

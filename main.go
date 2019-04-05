@@ -5,8 +5,8 @@ import (
 
 	"github.com/JaneKetko/Buses/src/config"
 	"github.com/JaneKetko/Buses/src/dbmanager"
+	"github.com/JaneKetko/Buses/src/grpcserver"
 	"github.com/JaneKetko/Buses/src/routemanager"
-	"github.com/JaneKetko/Buses/src/server"
 
 	_ "github.com/go-sql-driver/mysql"
 )
@@ -21,6 +21,8 @@ func main() {
 
 	dbman := dbmanager.NewDBManager(db)
 	routeman := routemanager.NewRouteManager(dbman)
-	busstation := server.NewBusStation(routeman, cfg)
-	busstation.StartServer()
+	s := grpcserver.NewServer(routeman, cfg)
+	s.RunServer()
+	// restserv := server.NewBusStation(routeman, cfg)
+	// restserv.StartServer()
 }

@@ -14,7 +14,7 @@ service BusesManager {
 }
 
 message Search {
-    string Start = 1;
+    string StartTime = 1;
     string EndPoint  = 2;
 }
 
@@ -35,9 +35,9 @@ message ListRoutes {
 
 message BusRoute {
     int64 ID               = 1; 
-	RoutePoints Points     = 2;
+    RoutePoints Points     = 2;
     google.protobuf.Timestamp Start = 3;
-	int64 Cost           = 4;
+    int64 Cost           = 4;
 	int64 FreeSeats       = 5;
     int64 AllSeats      = 6;
 }

@@ -1,8 +1,12 @@
 # Makefile
 
-run:
+server:
 	go get -d
-	go run *.go
+	go run main.go
+
+client:
+	go get -d
+	go run client/client.go
 
 build:
 	go get -d

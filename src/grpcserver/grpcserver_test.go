@@ -3,7 +3,6 @@ package grpcserver
 import (
 	"context"
 	"errors"
-	"log"
 	"testing"
 	"time"
 
@@ -12,16 +11,18 @@ import (
 	"github.com/JaneKetko/Buses/src/domain"
 	"github.com/JaneKetko/Buses/src/routemanager"
 	"github.com/JaneKetko/Buses/src/routemanager/mocks"
+
 	"github.com/stretchr/testify/require"
 )
 
 func TestGetRoutes(t *testing.T) {
 	cfg := &config.Config{
-		PortServer: 8000,
+		PortServer: ":8000",
 	}
 	var routestrg mocks.RouteStorage
 	routeman := routemanager.NewRouteManager(&routestrg)
 	s := NewServer(routeman, cfg)
+	ctx := context.Background()
 
 	routes := []domain.Route{
 		{
@@ -54,10 +55,9 @@ func TestGetRoutes(t *testing.T) {
 		},
 	}
 
-	routestrg.On("GetAllData", context.Background()).Return(testCases[0].expectedRoutes, testCases[0].expectedError)
+	routestrg.On("GetAllData", ctx).Return(testCases[0].expectedRoutes, testCases[0].expectedError)
 	t.Run(testCases[0].name, func(t *testing.T) {
-		_, err := s.GetRoutes(context.Background(), &proto.Nothing{})
-		log.Println(err)
+		_, err := s.GetRoutes(ctx, &proto.Nothing{})
 		require.NoError(t, err)
 	})
 
@@ -65,10 +65,9 @@ func TestGetRoutes(t *testing.T) {
 	routeman = routemanager.NewRouteManager(&rtstrg)
 	s = NewServer(routeman, cfg)
 
-	rtstrg.On("GetAllData", context.Background()).Return(testCases[1].expectedRoutes, testCases[1].expectedError)
+	rtstrg.On("GetAllData", ctx).Return(testCases[1].expectedRoutes, testCases[1].expectedError)
 	t.Run(testCases[1].name, func(t *testing.T) {
-		_, err := s.GetRoutes(context.Background(), &proto.Nothing{})
-		log.Println(err)
+		_, err := s.GetRoutes(ctx, &proto.Nothing{})
 		require.Equal(t, err, testCases[1].expectedError)
 	})
 	routestrg.AssertExpectations(t)
@@ -77,11 +76,12 @@ func TestGetRoutes(t *testing.T) {
 
 func TestGetRoute(t *testing.T) {
 	cfg := &config.Config{
-		PortServer: 8000,
+		PortServer: ":8000",
 	}
 	var routestrg mocks.RouteStorage
 	routeman := routemanager.NewRouteManager(&routestrg)
 	s := NewServer(routeman, cfg)
+	ctx := context.Background()
 
 	routes := []domain.Route{
 		{
@@ -96,8 +96,6 @@ func TestGetRoute(t *testing.T) {
 			AllSeats:  13,
 		},
 	}
-
-	ctx := context.Background()
 
 	testCases := []struct {
 		name          string
@@ -115,7 +113,7 @@ func TestGetRoute(t *testing.T) {
 			name:          "no route",
 			routeID:       2,
 			expectedRoute: nil,
-			expectedError: errors.New(domain.ErrNoRoutes),
+			expectedError: domain.ErrNoRoutes,
 		},
 	}
 
@@ -136,7 +134,7 @@ func TestGetRoute(t *testing.T) {
 func TestDeleteRoute(t *testing.T) {
 
 	cfg := &config.Config{
-		PortServer: 8000,
+		PortServer: ":8000",
 	}
 	var routestrg mocks.RouteStorage
 	routeman := routemanager.NewRouteManager(&routestrg)
@@ -156,7 +154,7 @@ func TestDeleteRoute(t *testing.T) {
 		{
 			name:          "no route",
 			routeID:       2,
-			expectedError: errors.New(domain.ErrNoRoutes),
+			expectedError: domain.ErrNoRoutes,
 		},
 	}
 
@@ -176,7 +174,7 @@ func TestDeleteRoute(t *testing.T) {
 
 func TestBuyTicket(t *testing.T) {
 	cfg := &config.Config{
-		PortServer: 8000,
+		PortServer: ":8000",
 	}
 	var routestrg mocks.RouteStorage
 	routeman := routemanager.NewRouteManager(&routestrg)
@@ -210,7 +208,7 @@ func TestBuyTicket(t *testing.T) {
 			name:           "errors",
 			routeID:        2,
 			expectedTicket: nil,
-			expectedError:  errors.New(domain.ErrNoRoutes),
+			expectedError:  domain.ErrNoRoutes,
 		},
 	}
 
@@ -230,7 +228,7 @@ func TestBuyTicket(t *testing.T) {
 
 func TestSearchRoutes(t *testing.T) {
 	cfg := &config.Config{
-		PortServer: 8000,
+		PortServer: ":8000",
 	}
 	var routestrg mocks.RouteStorage
 	routeman := routemanager.NewRouteManager(&routestrg)
@@ -295,8 +293,8 @@ func TestSearchRoutes(t *testing.T) {
 			date:           "2019-04-12",
 			endPoint:       "Grodno",
 			expectedRoutes: nil,
-			expectedError:  errors.New(domain.ErrNoRoutesByEndPoint),
-			expTotalError:  errors.New(domain.ErrNoRoutesByEndPoint),
+			expectedError:  domain.ErrNoRoutesByEndPoint,
+			expTotalError:  domain.ErrNoRoutesByEndPoint,
 		},
 		{
 			name:           "no routes by date",
@@ -304,7 +302,7 @@ func TestSearchRoutes(t *testing.T) {
 			endPoint:       "Mir",
 			expectedRoutes: routes[2:],
 			expectedError:  nil,
-			expTotalError:  errors.New(domain.ErrNoRoutes),
+			expTotalError:  domain.ErrNoRoutes,
 		},
 		{
 			name:           "invalid date",
@@ -312,7 +310,7 @@ func TestSearchRoutes(t *testing.T) {
 			endPoint:       "Mir",
 			expectedRoutes: routes[2:],
 			expectedError:  nil,
-			expTotalError:  errors.New(domain.ErrInvalidDate),
+			expTotalError:  domain.ErrInvalidDate,
 		},
 	}
 	for _, tc := range testCases {
@@ -322,7 +320,97 @@ func TestSearchRoutes(t *testing.T) {
 	for _, tc := range testCases {
 		tc := tc
 		t.Run(tc.name, func(t *testing.T) {
-			_, err := s.SearchRoutes(ctx, &proto.Search{Start: tc.date, EndPoint: tc.endPoint})
+			_, err := s.SearchRoutes(ctx, &proto.Search{StartTime: tc.date, EndPoint: tc.endPoint})
+			require.Equal(t, tc.expTotalError, err)
+		})
+	}
+	routestrg.AssertExpectations(t)
+}
+
+func TestCreateRoute(t *testing.T) {
+	cfg := &config.Config{
+		PortServer: ":8000",
+	}
+	var routestrg mocks.RouteStorage
+	routeman := routemanager.NewRouteManager(&routestrg)
+	s := NewServer(routeman, cfg)
+	ctx := context.Background()
+
+	routes := []domain.Route{
+		{
+			Points: domain.Points{
+				StartPoint: "Vitebsk",
+				EndPoint:   "Minsk",
+			},
+			Start:     time.Date(2002, 04, 23, 10, 0, 0, 0, time.UTC),
+			Cost:      1000,
+			FreeSeats: 12,
+			AllSeats:  13,
+		},
+		{
+			Points: domain.Points{
+				StartPoint: "Grodno",
+				EndPoint:   "Minsk",
+			},
+			Start:     time.Date(2020, 04, 12, 10, 0, 0, 0, time.UTC),
+			Cost:      1000,
+			FreeSeats: 12,
+			AllSeats:  13,
+		},
+		{
+			Points: domain.Points{
+				StartPoint: "Grodno",
+				EndPoint:   "Mir",
+			},
+			Start:     time.Date(2021, 04, 12, 10, 0, 0, 0, time.UTC),
+			Cost:      1000,
+			FreeSeats: 12,
+			AllSeats:  13,
+		},
+	}
+
+	testCases := []struct {
+		name          string
+		route         *domain.Route
+		expectedID    int
+		expectedError error
+		expTotalError error
+	}{
+		{
+			name:          "invalid date",
+			route:         &routes[0],
+			expectedID:    1,
+			expectedError: nil,
+			expTotalError: domain.ErrInvalidDate,
+		},
+		{
+			name:          "errors",
+			route:         &routes[1],
+			expectedID:    2,
+			expectedError: errors.New("smth bad"),
+			expTotalError: errors.New("smth bad"),
+		},
+		{
+			name:          "successful test",
+			route:         &routes[2],
+			expectedID:    3,
+			expectedError: nil,
+			expTotalError: nil,
+		},
+	}
+
+	for _, tc := range testCases[1:] {
+		routestrg.On("AddRoute", ctx,
+			tc.route).
+			Return(tc.expectedID, tc.expectedError)
+	}
+
+	for _, tc := range testCases {
+		tc := tc
+		t.Run(tc.name, func(t *testing.T) {
+			r, err := s.convertTypes(*tc.route)
+			require.NoError(t, err)
+			_, err = s.CreateRoute(ctx, &proto.SingleRoute{Route: r})
 			require.Equal(t, tc.expTotalError, err)
 		})
 	}

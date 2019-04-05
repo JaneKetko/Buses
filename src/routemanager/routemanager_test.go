@@ -78,9 +78,9 @@ func TestRoutesByEndPoint(t *testing.T) {
 			date:           time.Date(2019, 04, 10, 10, 0, 0, 0, time.UTC),
 			endPoint:       "Grodno",
 			expectedRoutes: nil,
-			expectedError:  errors.New(domain.ErrNoRoutesByEndPoint),
+			expectedError:  domain.ErrNoRoutesByEndPoint,
 			expTotalRoutes: nil,
-			expTotalError:  errors.New(domain.ErrNoRoutesByEndPoint),
+			expTotalError:  domain.ErrNoRoutesByEndPoint,
 		},
 		{
 			name:           "no routes by date",
@@ -89,7 +89,7 @@ func TestRoutesByEndPoint(t *testing.T) {
 			expectedRoutes: routes[2:],
 			expectedError:  nil,
 			expTotalRoutes: nil,
-			expTotalError:  errors.New(domain.ErrNoRoutes),
+			expTotalError:  domain.ErrNoRoutes,
 		},
 	}
 
@@ -158,7 +158,7 @@ func TestCreateNewRoute(t *testing.T) {
 			route:         &routes[0],
 			expectedID:    1,
 			expectedError: nil,
-			expTotalError: errors.New(domain.ErrInvalidDate),
+			expTotalError: domain.ErrInvalidDate,
 		},
 		{
 			name:          "errors",
@@ -176,7 +176,7 @@ func TestCreateNewRoute(t *testing.T) {
 		},
 	}
 
-	for _, tc := range testCases {
+	for _, tc := range testCases[1:] {
 		routestrg.On("AddRoute", ctx,
 			tc.route).
 			Return(tc.expectedID, tc.expectedError)
@@ -271,7 +271,7 @@ func TestGetRouteByID(t *testing.T) {
 			name:          "no route",
 			routeID:       2,
 			expectedRoute: nil,
-			expectedError: errors.New(domain.ErrNoRoutes),
+			expectedError: domain.ErrNoRoutes,
 		},
 	}
 
@@ -308,7 +308,7 @@ func TestDeleteRouteByID(t *testing.T) {
 		{
 			name:          "no route",
 			routeID:       2,
-			expectedError: errors.New(domain.ErrNoRoutes),
+			expectedError: domain.ErrNoRoutes,
 		},
 	}
 
@@ -356,7 +356,7 @@ func TestTakePlaceInBus(t *testing.T) {
 			name:           "errors",
 			routeID:        2,
 			expectedTicket: nil,
-			expectedError:  errors.New(domain.ErrNoRoutes),
+			expectedError:  domain.ErrNoRoutes,
 		},
 	}
 

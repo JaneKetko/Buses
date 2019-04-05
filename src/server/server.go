@@ -8,6 +8,8 @@ import (
 	"strconv"
 	"time"
 
+	"github.com/JaneKetko/Buses/src/domain"
+
 	"github.com/JaneKetko/Buses/src/config"
 	"github.com/JaneKetko/Buses/src/routemanager"
 	"github.com/gorilla/mux"
@@ -30,7 +32,7 @@ func NewBusStation(r *routemanager.RouteManager, c *config.Config) *BusStation {
 func (b *BusStation) getRoutes(w http.ResponseWriter, r *http.Request) {
 	w.Header().Set("Content-Type", "application/json")
 
-	rts, err := b.routes.GetAllRoutes()
+	rts, err := b.routes.GetRoutes(r.Context())
 	if err != nil {
 		http.Error(w, err.Error(), http.StatusInternalServerError)
 		return
@@ -59,7 +61,7 @@ func (b *BusStation) getRoute(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	route, err := b.routes.GetRouteByID(id)
+	route, err := b.routes.GetRouteByID(r.Context(), id)
 	if err != nil {
 		http.Error(w, err.Error(), http.StatusInternalServerError)
 		return
@@ -82,7 +84,7 @@ func (b *BusStation) createRoute(w http.ResponseWriter, r *http.Request) {
 	}
 
 	route := routeServerToRoute(rserver)
-	err = b.routes.CreateNewRoute(&route)
+	err = b.routes.CreateRoute(r.Context(), &route)
 	if err != nil {
 		http.Error(w, err.Error(), http.StatusBadRequest)
 		return
@@ -104,7 +106,7 @@ func (b *BusStation) deleteRoute(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	err = b.routes.DeleteRouteByID(id)
+	err = b.routes.DeleteRoute(r.Context(), id)
 	if err != nil {
 		http.Error(w, err.Error(), http.StatusInternalServerError)
 		return
@@ -126,7 +128,7 @@ func (b *BusStation) buyTicket(w http.ResponseWriter, r *http.Request) {
 		http.Error(w, err.Error(), http.StatusBadRequest)
 		return
 	}
-	ticket, err := b.routes.TakePlaceInBus(id)
+	ticket, err := b.routes.BuyTicket(r.Context(), id)
 	if err != nil {
 		http.Error(w, err.Error(), http.StatusInternalServerError)
 		return
@@ -146,11 +148,11 @@ func (b *BusStation) searchRoutes(w http.ResponseWriter, r *http.Request) {
 	endpoint := params["point"]
 	date, err := time.Parse("2006-01-02", searchDate)
 	if err != nil {
-		http.Error(w, "Invalid date argument!", http.StatusBadRequest)
+		http.Error(w, domain.ErrInvalidDate.Error(), http.StatusBadRequest)
 		return
 	}
 
-	routesDate, err := b.routes.ChooseRoutesByDateAndPoint(date, endpoint)
+	routesDate, err := b.routes.SearchRoutes(r.Context(), date, endpoint)
 	if err != nil {
 		http.Error(w, err.Error(), http.StatusInternalServerError)
 		return
@@ -173,7 +175,7 @@ func (b *BusStation) managerHandlers() *mux.Router {
 		Methods(http.MethodGet)
 	router.HandleFunc("/routes/buy/{id}", b.buyTicket).Methods(http.MethodPost)
 	router.HandleFunc("/routes", b.getRoutes).Methods(http.MethodGet)
-	router.HandleFunc("/routes", b.createRoute).Methods(http.MethodPost)
+	router.HandleFunc("/routes/add", b.createRoute).Methods(http.MethodPost)
 	router.HandleFunc("/routes/{id}", b.getRoute).Methods(http.MethodGet)
 	router.HandleFunc("/routes/{id}", b.deleteRoute).Methods(http.MethodDelete)
 	return router
@@ -181,7 +183,7 @@ func (b *BusStation) managerHandlers() *mux.Router {
 
 //StartServer - Start work with server
 func (b *BusStation) StartServer() {
-	fmt.Printf("Started server at http://localhost%v.\n", ":"+strconv.Itoa(b.config.PortServer))
+	fmt.Printf("Started server at http://localhost%v.\n", b.config.PortServer)
 	router := b.managerHandlers()
-	log.Fatal(http.ListenAndServe(":"+strconv.Itoa(b.config.PortServer), router))
+	log.Fatal(http.ListenAndServe(b.config.PortServer, router))
 }
