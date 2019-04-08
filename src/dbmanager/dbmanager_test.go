@@ -19,7 +19,7 @@ import (
 
 func dbOpen() (*sql.DB, error) {
 	config := &config.Config{
-		PortServer: 8000,
+		PortServer: ":8000",
 		Login:      "root",
 		Passwd:     "root",
 		Hostname:   "172.17.0.2",
@@ -36,7 +36,8 @@ func dbOpen() (*sql.DB, error) {
 
 func TestRouteID(t *testing.T) {
 
-	ctx := context.Background()
+	ctx, cancel := context.WithTimeout(context.Background(), 5*time.Second)
+	defer cancel()
 	db, err := dbOpen()
 	require.NoError(t, err)
 	dbmanager := NewDBManager(db)
@@ -93,7 +94,8 @@ func TestAddRoute(t *testing.T) {
 	db, err := dbOpen()
 	require.NoError(t, err)
 	dbmanager := NewDBManager(db)
-	ctx := context.Background()
+	ctx, cancel := context.WithTimeout(context.Background(), 5*time.Second)
+	defer cancel()
 
 	id, err := dbmanager.AddRoute(ctx, &routes[0])
 	require.NoError(t, err)
@@ -114,7 +116,8 @@ func TestGetAllData(t *testing.T) {
 	db, err := dbOpen()
 	require.NoError(t, err)
 	dbmanager := NewDBManager(db)
-	ctx := context.Background()
+	ctx, cancel := context.WithTimeout(context.Background(), 5*time.Second)
+	defer cancel()
 
 	route := domain.Route{
 		Points: domain.Points{
@@ -149,7 +152,8 @@ func TestDeleteRoute(t *testing.T) {
 	db, err := dbOpen()
 	require.NoError(t, err)
 	dbmanager := NewDBManager(db)
-	ctx := context.Background()
+	ctx, cancel := context.WithTimeout(context.Background(), 5*time.Second)
+	defer cancel()
 
 	route := domain.Route{
 		Points: domain.Points{
@@ -173,7 +177,8 @@ func TestFindRoute(t *testing.T) {
 	db, err := dbOpen()
 	require.NoError(t, err)
 	dbmanager := NewDBManager(db)
-	ctx := context.Background()
+	ctx, cancel := context.WithTimeout(context.Background(), 5*time.Second)
+	defer cancel()
 
 	routes := []domain.Route{
 		{
@@ -230,7 +235,8 @@ func TestTakePlace(t *testing.T) {
 	db, err := dbOpen()
 	require.NoError(t, err)
 	dbmanager := NewDBManager(db)
-	ctx := context.Background()
+	ctx, cancel := context.WithTimeout(context.Background(), 5*time.Second)
+	defer cancel()
 	routes := []domain.Route{
 		{
 			ID: 1,

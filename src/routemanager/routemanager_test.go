@@ -14,7 +14,8 @@ import (
 
 func TestRoutesByEndPoint(t *testing.T) {
 
-	ctx := context.Background()
+	ctx, cancel := context.WithTimeout(context.Background(), 5*time.Second)
+	defer cancel()
 
 	routes := []domain.Route{
 		{
@@ -109,7 +110,8 @@ func TestRoutesByEndPoint(t *testing.T) {
 }
 
 func TestCreateNewRoute(t *testing.T) {
-	ctx := context.Background()
+	ctx, cancel := context.WithTimeout(context.Background(), 5*time.Second)
+	defer cancel()
 	var routestrg mocks.RouteStorage
 	routeman := NewRouteManager(&routestrg)
 
@@ -206,7 +208,8 @@ func TestGetAllRoutes(t *testing.T) {
 			AllSeats:  13,
 		},
 	}
-	ctx := context.Background()
+	ctx, cancel := context.WithTimeout(context.Background(), 5*time.Second)
+	defer cancel()
 	var routestrg mocks.RouteStorage
 	routeman := NewRouteManager(&routestrg)
 
@@ -251,7 +254,8 @@ func TestGetRouteByID(t *testing.T) {
 			AllSeats:  13,
 		},
 	}
-	ctx := context.Background()
+	ctx, cancel := context.WithTimeout(context.Background(), 5*time.Second)
+	defer cancel()
 	var routestrg mocks.RouteStorage
 	routeman := NewRouteManager(&routestrg)
 
@@ -291,7 +295,8 @@ func TestGetRouteByID(t *testing.T) {
 }
 
 func TestDeleteRouteByID(t *testing.T) {
-	ctx := context.Background()
+	ctx, cancel := context.WithTimeout(context.Background(), 5*time.Second)
+	defer cancel()
 	var routestrg mocks.RouteStorage
 	routeman := NewRouteManager(&routestrg)
 
@@ -327,7 +332,8 @@ func TestDeleteRouteByID(t *testing.T) {
 }
 
 func TestTakePlaceInBus(t *testing.T) {
-	ctx := context.Background()
+	ctx, cancel := context.WithTimeout(context.Background(), 5*time.Second)
+	defer cancel()
 	var routestrg mocks.RouteStorage
 	routeman := NewRouteManager(&routestrg)
 	ticket := &domain.Ticket{

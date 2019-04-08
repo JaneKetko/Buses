@@ -1,16 +1,24 @@
 # Makefile
 
-server:
-	go get -d
-	go run main.go
+run: 
+	./bin/server & ./bin/client
 
-client:
-	go get -d
-	go run client/client.go
+grpcserver:
+	go run cmd/server-grpc/main.go
 
-build:
-	go get -d
-	go build -o out.bin
+restserver:
+	go run cmd/server-rest/main.go
+
+run-client:
+	go run cmd/client/main.go
+
+build_server:
+	go build -o ./bin/server github.com/JaneKetko/Buses/cmd/server-grpc
+
+build_client:
+	go build -o ./bin/client github.com/JaneKetko/Buses/cmd/client
+
+build: build_server build_client
 
 lint:
 	golangci-lint run \
@@ -31,3 +39,4 @@ lint:
 		--enable=gochecknoinits \
 		--gocyclo.min-complexity 10 \
 		./...
+

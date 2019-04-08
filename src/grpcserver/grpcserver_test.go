@@ -22,7 +22,8 @@ func TestGetRoutes(t *testing.T) {
 	var routestrg mocks.RouteStorage
 	routeman := routemanager.NewRouteManager(&routestrg)
 	s := NewServer(routeman, cfg)
-	ctx := context.Background()
+	ctx, cancel := context.WithTimeout(context.Background(), 5*time.Second)
+	defer cancel()
 
 	routes := []domain.Route{
 		{
@@ -81,7 +82,8 @@ func TestGetRoute(t *testing.T) {
 	var routestrg mocks.RouteStorage
 	routeman := routemanager.NewRouteManager(&routestrg)
 	s := NewServer(routeman, cfg)
-	ctx := context.Background()
+	ctx, cancel := context.WithTimeout(context.Background(), 5*time.Second)
+	defer cancel()
 
 	routes := []domain.Route{
 		{
@@ -139,7 +141,8 @@ func TestDeleteRoute(t *testing.T) {
 	var routestrg mocks.RouteStorage
 	routeman := routemanager.NewRouteManager(&routestrg)
 	s := NewServer(routeman, cfg)
-	ctx := context.Background()
+	ctx, cancel := context.WithTimeout(context.Background(), 5*time.Second)
+	defer cancel()
 
 	testCases := []struct {
 		name          string
@@ -190,7 +193,8 @@ func TestBuyTicket(t *testing.T) {
 		Place:     10,
 	}
 
-	ctx := context.Background()
+	ctx, cancel := context.WithTimeout(context.Background(), 5*time.Second)
+	defer cancel()
 
 	testCases := []struct {
 		name           string
@@ -270,7 +274,8 @@ func TestSearchRoutes(t *testing.T) {
 		},
 	}
 
-	ctx := context.Background()
+	ctx, cancel := context.WithTimeout(context.Background(), 5*time.Second)
+	defer cancel()
 
 	testCases := []struct {
 		name           string
@@ -334,8 +339,8 @@ func TestCreateRoute(t *testing.T) {
 	var routestrg mocks.RouteStorage
 	routeman := routemanager.NewRouteManager(&routestrg)
 	s := NewServer(routeman, cfg)
-	ctx := context.Background()
-
+	ctx, cancel := context.WithTimeout(context.Background(), 5*time.Second)
+	defer cancel()
 	routes := []domain.Route{
 		{
 			Points: domain.Points{

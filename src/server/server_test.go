@@ -1,7 +1,6 @@
 package server
 
 import (
-	"context"
 	"errors"
 	"fmt"
 	"net/http"
@@ -10,6 +9,7 @@ import (
 	"time"
 
 	"github.com/gavv/httpexpect"
+	"github.com/stretchr/testify/mock"
 
 	"github.com/JaneKetko/Buses/src/config"
 	"github.com/JaneKetko/Buses/src/domain"
@@ -30,7 +30,6 @@ func TestGetRoutes(t *testing.T) {
 	server := httptest.NewServer(s)
 	defer server.Close()
 	e := httpexpect.New(t, server.URL)
-	ctx := context.Background()
 
 	routes := []domain.Route{
 		{
@@ -65,7 +64,7 @@ func TestGetRoutes(t *testing.T) {
 		},
 	}
 
-	routestrg.On("GetAllData", ctx).Return(testCases[0].expectedRoutes, testCases[0].expectedError)
+	routestrg.On("GetAllData", mock.Anything).Return(testCases[0].expectedRoutes, testCases[0].expectedError)
 
 	t.Run(testCases[0].name, func(t *testing.T) {
 		res := e.Request(http.MethodGet, "/routes").Expect()
@@ -81,7 +80,7 @@ func TestGetRoutes(t *testing.T) {
 	defer server.Close()
 	e = httpexpect.New(t, server.URL)
 
-	rtstrg.On("GetAllData", ctx).Return(testCases[1].expectedRoutes, testCases[1].expectedError)
+	rtstrg.On("GetAllData", mock.Anything).Return(testCases[1].expectedRoutes, testCases[1].expectedError)
 	t.Run(testCases[1].name, func(t *testing.T) {
 		res := e.Request(http.MethodGet, "/routes").Expect()
 		res.Status(testCases[1].expectedStatus)
@@ -101,8 +100,6 @@ func TestGetRoute(t *testing.T) {
 	server := httptest.NewServer(s)
 	defer server.Close()
 	e := httpexpect.New(t, server.URL)
-	ctx := context.Background()
-
 	routes := []domain.Route{
 		{
 			ID: 1,
@@ -150,7 +147,7 @@ func TestGetRoute(t *testing.T) {
 		},
 	}
 	for _, tc := range testCases {
-		routestrg.On("RouteByID", ctx, tc.routeID).Return(tc.expectedRoute, tc.expectedError)
+		routestrg.On("RouteByID", mock.Anything, tc.routeID).Return(tc.expectedRoute, tc.expectedError)
 	}
 
 	for _, tc := range testCases {
@@ -174,8 +171,6 @@ func TestCreateRoute(t *testing.T) {
 	server := httptest.NewServer(s)
 	defer server.Close()
 	e := httpexpect.New(t, server.URL)
-	ctx := context.Background()
-
 	routes := []domain.Route{
 		{
 			Points: domain.Points{
@@ -222,7 +217,7 @@ func TestCreateRoute(t *testing.T) {
 	}
 
 	for _, tc := range testCases {
-		routestrg.On("AddRoute", ctx,
+		routestrg.On("AddRoute", mock.Anything,
 			tc.route).
 			Return(tc.expectedID, tc.expectedError)
 	}
@@ -249,7 +244,6 @@ func TestDeleteRoute(t *testing.T) {
 	server := httptest.NewServer(s)
 	defer server.Close()
 	e := httpexpect.New(t, server.URL)
-	ctx := context.Background()
 
 	testCases := []struct {
 		name           string
@@ -281,7 +275,7 @@ func TestDeleteRoute(t *testing.T) {
 	}
 
 	for _, tc := range testCases {
-		routestrg.On("DeleteRow", ctx, tc.routeID).Return(tc.expectedError)
+		routestrg.On("DeleteRow", mock.Anything, tc.routeID).Return(tc.expectedError)
 	}
 
 	for _, tc := range testCases {
@@ -305,7 +299,6 @@ func TestSearchRoutes(t *testing.T) {
 	server := httptest.NewServer(s)
 	defer server.Close()
 	e := httpexpect.New(t, server.URL)
-	ctx := context.Background()
 
 	routes := []domain.Route{
 		{
@@ -378,7 +371,7 @@ func TestSearchRoutes(t *testing.T) {
 	}
 
 	for _, tc := range testCases {
-		routestrg.On("RoutesByEndPoint", ctx, tc.endPoint).Return(tc.expectedRoutes, tc.expectedError)
+		routestrg.On("RoutesByEndPoint", mock.Anything, tc.endPoint).Return(tc.expectedRoutes, tc.expectedError)
 	}
 
 	for _, tc := range testCases {
@@ -402,8 +395,6 @@ func TestBuyTicket(t *testing.T) {
 	s := busstation.managerHandlers()
 	server := httptest.NewServer(s)
 	defer server.Close()
-	ctx := context.Background()
-
 	e := httpexpect.New(t, server.URL)
 
 	ticket := &domain.Ticket{
@@ -451,7 +442,7 @@ func TestBuyTicket(t *testing.T) {
 	}
 
 	for _, tc := range testCases {
-		routestrg.On("TakePlace", ctx, tc.routeID).Return(tc.expectedTicket, tc.expectedError)
+		routestrg.On("TakePlace", mock.Anything, tc.routeID).Return(tc.expectedTicket, tc.expectedError)
 	}
 
 	for _, tc := range testCases {

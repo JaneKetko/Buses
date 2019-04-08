@@ -8,10 +8,10 @@ import (
 	"strconv"
 	"time"
 
-	"github.com/JaneKetko/Buses/src/domain"
-
 	"github.com/JaneKetko/Buses/src/config"
+	"github.com/JaneKetko/Buses/src/domain"
 	"github.com/JaneKetko/Buses/src/routemanager"
+
 	"github.com/gorilla/mux"
 )
 
