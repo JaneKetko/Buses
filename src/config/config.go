@@ -6,12 +6,13 @@ import (
 
 //Config - struct for project info.
 type Config struct {
-	PortServer string `default:":8000"`
-	Login      string `default:"root"`
-	Passwd     string `default:"root"`
-	Hostname   string `default:"172.17.0.2"`
-	Port       int    `default:"3306"`
-	DBName     string `default:"busstation"`
+	PortGRPCServer string `default:":8001"`
+	PortRESTServer string `default:":8000"`
+	Login          string `default:"root"`
+	Passwd         string `default:"root"`
+	Hostname       string `default:"172.17.0.2"`
+	Port           int    `default:"3306"`
+	DBName         string `default:"busstation"`
 }
 
 //GetData - get data from config file(new config object).

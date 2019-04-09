@@ -6,14 +6,14 @@ import (
 	"net"
 	"time"
 
-	"google.golang.org/grpc/reflection"
-
-	"github.com/JaneKetko/Buses/src/domain"
 	"google.golang.org/grpc"
+	"google.golang.org/grpc/reflection"
 
 	pb "github.com/JaneKetko/Buses/api/proto"
 	"github.com/JaneKetko/Buses/src/config"
+	"github.com/JaneKetko/Buses/src/domain"
 	"github.com/JaneKetko/Buses/src/routemanager"
+
 	"github.com/golang/protobuf/ptypes"
 )
 
@@ -34,7 +34,7 @@ func NewServer(r *routemanager.RouteManager, c *config.Config) *Server {
 //RunServer - start serving.
 func (s *Server) RunServer() {
 
-	lis, err := net.Listen("tcp", s.config.PortServer)
+	lis, err := net.Listen("tcp", s.config.PortGRPCServer)
 	if err != nil {
 		log.Fatalf("failed to listen: %v", err)
 	}

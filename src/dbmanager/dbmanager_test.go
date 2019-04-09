@@ -19,12 +19,11 @@ import (
 
 func dbOpen() (*sql.DB, error) {
 	config := &config.Config{
-		PortServer: ":8000",
-		Login:      "root",
-		Passwd:     "root",
-		Hostname:   "172.17.0.2",
-		Port:       3306,
-		DBName:     "busstationtest",
+		Login:    "root",
+		Passwd:   "root",
+		Hostname: "172.17.0.2",
+		Port:     3306,
+		DBName:   "busstationtest",
 	}
 
 	db, err := Open(config)
@@ -145,6 +144,65 @@ func TestGetAllData(t *testing.T) {
 	assert.NoError(t, err)
 
 	_, err = dbmanager.GetAllData(ctx)
+	assert.Equal(t, err, domain.ErrNoRoutes)
+}
+
+func TestGetCurrentRoutes(t *testing.T) {
+	db, err := dbOpen()
+	require.NoError(t, err)
+	dbmanager := NewDBManager(db)
+	ctx, cancel := context.WithTimeout(context.Background(), 5*time.Second)
+	defer cancel()
+
+	routes := []domain.Route{
+		{
+			ID: 1,
+			Points: domain.Points{
+				StartPoint: "Minsk",
+				EndPoint:   "Vitebsk",
+			},
+			Start:     time.Date(2019, 02, 23, 10, 0, 0, 0, time.UTC),
+			Cost:      1000,
+			FreeSeats: 12,
+			AllSeats:  13,
+		},
+		{
+			Points: domain.Points{
+				StartPoint: "Minsk",
+				EndPoint:   "Vitebsk",
+			},
+			Start:     time.Date(2030, 02, 12, 10, 0, 0, 0, time.UTC),
+			Cost:      1000,
+			FreeSeats: 12,
+			AllSeats:  13,
+		},
+		{
+			Points: domain.Points{
+				StartPoint: "Minsk",
+				EndPoint:   "Lida",
+			},
+			Start:     time.Date(2031, 04, 10, 10, 0, 0, 0, time.UTC),
+			Cost:      1000,
+			FreeSeats: 12,
+			AllSeats:  13,
+		},
+	}
+	id1, err := dbmanager.AddRoute(ctx, &routes[0])
+	require.NoError(t, err)
+	id2, err := dbmanager.AddRoute(ctx, &routes[1])
+	require.NoError(t, err)
+	id3, err := dbmanager.AddRoute(ctx, &routes[2])
+	require.NoError(t, err)
+
+	rts, err := dbmanager.GetCurrentData(ctx)
+	assert.NoError(t, err)
+
+	assert.Equal(t, 2, len(rts))
+
+	_, err = db.Exec("DELETE FROM route where id_route in (?, ?, ?)", id1, id2, id3)
+	assert.NoError(t, err)
+
+	_, err = dbmanager.GetCurrentData(ctx)
 	assert.Equal(t, err, domain.ErrNoRoutes)
 }
 

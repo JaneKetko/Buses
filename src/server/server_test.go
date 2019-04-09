@@ -17,10 +17,9 @@ import (
 	"github.com/JaneKetko/Buses/src/routemanager/mocks"
 )
 
-func TestGetRoutes(t *testing.T) {
-
+func forGetRoutes(t *testing.T, method, path string) {
 	cfg := &config.Config{
-		PortServer: ":8000",
+		PortRESTServer: ":8000",
 	}
 	var routestrg mocks.RouteStorage
 	routeman := routemanager.NewRouteManager(&routestrg)
@@ -64,10 +63,10 @@ func TestGetRoutes(t *testing.T) {
 		},
 	}
 
-	routestrg.On("GetAllData", mock.Anything).Return(testCases[0].expectedRoutes, testCases[0].expectedError)
+	routestrg.On(method, mock.Anything).Return(testCases[0].expectedRoutes, testCases[0].expectedError)
 
 	t.Run(testCases[0].name, func(t *testing.T) {
-		res := e.Request(http.MethodGet, "/routes").Expect()
+		res := e.Request(http.MethodGet, path).Expect()
 		res.Status(testCases[0].expectedStatus)
 	})
 
@@ -80,17 +79,25 @@ func TestGetRoutes(t *testing.T) {
 	defer server.Close()
 	e = httpexpect.New(t, server.URL)
 
-	rtstrg.On("GetAllData", mock.Anything).Return(testCases[1].expectedRoutes, testCases[1].expectedError)
+	rtstrg.On(method, mock.Anything).Return(testCases[1].expectedRoutes, testCases[1].expectedError)
 	t.Run(testCases[1].name, func(t *testing.T) {
-		res := e.Request(http.MethodGet, "/routes").Expect()
+		res := e.Request(http.MethodGet, path).Expect()
 		res.Status(testCases[1].expectedStatus)
 	})
+}
+
+func TestGetRoutes(t *testing.T) {
+	forGetRoutes(t, "GetAllData", "/routes")
+}
+
+func TestGetCurrentRoutes(t *testing.T) {
+	forGetRoutes(t, "GetCurrentData", "/buses")
 }
 
 func TestGetRoute(t *testing.T) {
 
 	cfg := &config.Config{
-		PortServer: ":8000",
+		PortRESTServer: ":8000",
 	}
 	var routestrg mocks.RouteStorage
 	routeman := routemanager.NewRouteManager(&routestrg)
@@ -161,7 +168,7 @@ func TestGetRoute(t *testing.T) {
 
 func TestCreateRoute(t *testing.T) {
 	cfg := &config.Config{
-		PortServer: ":8000",
+		PortRESTServer: ":8000",
 	}
 	var routestrg mocks.RouteStorage
 	routeman := routemanager.NewRouteManager(&routestrg)
@@ -234,7 +241,7 @@ func TestCreateRoute(t *testing.T) {
 
 func TestDeleteRoute(t *testing.T) {
 	cfg := &config.Config{
-		PortServer: ":8000",
+		PortRESTServer: ":8000",
 	}
 	var routestrg mocks.RouteStorage
 	routeman := routemanager.NewRouteManager(&routestrg)
@@ -286,10 +293,9 @@ func TestDeleteRoute(t *testing.T) {
 		})
 	}
 }
-
 func TestSearchRoutes(t *testing.T) {
 	cfg := &config.Config{
-		PortServer: ":8000",
+		PortRESTServer: ":8000",
 	}
 	var routestrg mocks.RouteStorage
 	routeman := routemanager.NewRouteManager(&routestrg)
@@ -386,7 +392,7 @@ func TestSearchRoutes(t *testing.T) {
 
 func TestBuyTicket(t *testing.T) {
 	cfg := &config.Config{
-		PortServer: ":8000",
+		PortRESTServer: ":8000",
 	}
 	var routestrg mocks.RouteStorage
 	routeman := routemanager.NewRouteManager(&routestrg)

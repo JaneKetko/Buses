@@ -10,6 +10,7 @@ import (
 //RouteStorage - interface for database methods.
 type RouteStorage interface {
 	GetAllData(ctx context.Context) ([]domain.Route, error)
+	GetCurrentData(ctx context.Context) ([]domain.Route, error)
 	RouteByID(ctx context.Context, id int) (*domain.Route, error)
 	DeleteRow(ctx context.Context, id int) error
 	RoutesByEndPoint(ctx context.Context, point string) ([]domain.Route, error)
@@ -30,6 +31,10 @@ func NewRouteManager(storage RouteStorage) *RouteManager {
 //GetRoutes gets all routes.
 func (r RouteManager) GetRoutes(ctx context.Context) ([]domain.Route, error) {
 	return r.storage.GetAllData(ctx)
+}
+
+func (r RouteManager) GetCurrentRoutes(ctx context.Context) ([]domain.Route, error) {
+	return r.storage.GetCurrentData(ctx)
 }
 
 //GetRouteByID gets route by id.

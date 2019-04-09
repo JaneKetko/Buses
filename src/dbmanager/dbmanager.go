@@ -67,15 +67,11 @@ func Open(cfg *config.Config) (*sql.DB, error) {
 	return db, nil
 }
 
-//GetAllData gets full data from db.
-func (dbmanager *DBManager) GetAllData(ctx context.Context) ([]domain.Route, error) {
-
+func getData(ctx context.Context, dbmngr *DBManager, request string) ([]domain.Route, error) {
 	var dbr RouteDB
 	var routes []domain.Route
 
-	rows, err := dbmanager.db.QueryContext(ctx, `SELECT r.id_route, r.starttime, r.cost, r.freeseats, r.allseats,
-		p.id_points, p.startpoint, p.endpoint
-		FROM route r JOIN points p ON r.id_points = p.id_points`)
+	rows, err := dbmngr.db.QueryContext(ctx, request)
 
 	if err != nil {
 		return nil, errors.New("data hasn't read")
@@ -99,6 +95,31 @@ func (dbmanager *DBManager) GetAllData(ctx context.Context) ([]domain.Route, err
 	}
 
 	return routes, nil
+}
+
+//GetAllData gets full data from db.
+func (dbmanager *DBManager) GetAllData(ctx context.Context) ([]domain.Route, error) {
+
+	req := `SELECT r.id_route, r.starttime, r.cost, r.freeseats, r.allseats,
+	p.id_points, p.startpoint, p.endpoint
+	FROM route r 
+	JOIN points p 
+	ON r.id_points = p.id_points`
+
+	return getData(ctx, dbmanager, req)
+}
+
+//GetCurrentRoutes gets current buses. Their start time equal or greater than today.
+func (dbmanager *DBManager) GetCurrentData(ctx context.Context) ([]domain.Route, error) {
+
+	req := `SELECT r.id_route, r.starttime, r.cost, r.freeseats, r.allseats,
+	p.id_points, p.startpoint, p.endpoint
+	FROM route r 
+	JOIN points p 
+	ON r.id_points = p.id_points
+	WHERE r.starttime >= DATE(NOW())`
+
+	return getData(ctx, dbmanager, req)
 }
 
 //RouteByID finds route by id in database.

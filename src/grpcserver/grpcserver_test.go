@@ -17,7 +17,7 @@ import (
 
 func TestGetRoutes(t *testing.T) {
 	cfg := &config.Config{
-		PortServer: ":8000",
+		PortGRPCServer: ":8000",
 	}
 	var routestrg mocks.RouteStorage
 	routeman := routemanager.NewRouteManager(&routestrg)
@@ -77,7 +77,7 @@ func TestGetRoutes(t *testing.T) {
 
 func TestGetRoute(t *testing.T) {
 	cfg := &config.Config{
-		PortServer: ":8000",
+		PortGRPCServer: ":8000",
 	}
 	var routestrg mocks.RouteStorage
 	routeman := routemanager.NewRouteManager(&routestrg)
@@ -136,7 +136,7 @@ func TestGetRoute(t *testing.T) {
 func TestDeleteRoute(t *testing.T) {
 
 	cfg := &config.Config{
-		PortServer: ":8000",
+		PortGRPCServer: ":8000",
 	}
 	var routestrg mocks.RouteStorage
 	routeman := routemanager.NewRouteManager(&routestrg)
@@ -177,7 +177,7 @@ func TestDeleteRoute(t *testing.T) {
 
 func TestBuyTicket(t *testing.T) {
 	cfg := &config.Config{
-		PortServer: ":8000",
+		PortGRPCServer: ":8000",
 	}
 	var routestrg mocks.RouteStorage
 	routeman := routemanager.NewRouteManager(&routestrg)
@@ -232,7 +232,7 @@ func TestBuyTicket(t *testing.T) {
 
 func TestSearchRoutes(t *testing.T) {
 	cfg := &config.Config{
-		PortServer: ":8000",
+		PortGRPCServer: ":8000",
 	}
 	var routestrg mocks.RouteStorage
 	routeman := routemanager.NewRouteManager(&routestrg)
@@ -334,7 +334,7 @@ func TestSearchRoutes(t *testing.T) {
 
 func TestCreateRoute(t *testing.T) {
 	cfg := &config.Config{
-		PortServer: ":8000",
+		PortGRPCServer: ":8000",
 	}
 	var routestrg mocks.RouteStorage
 	routeman := routemanager.NewRouteManager(&routestrg)

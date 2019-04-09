@@ -22,5 +22,5 @@ func main() {
 	dbman := dbmanager.NewDBManager(db)
 	routeman := routemanager.NewRouteManager(dbman)
 	restserv := server.NewBusStation(routeman, cfg)
-	restserv.StartServer()
+	restserv.RunServer()
 }

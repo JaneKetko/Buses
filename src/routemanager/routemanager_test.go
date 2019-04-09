@@ -8,6 +8,7 @@ import (
 
 	"github.com/JaneKetko/Buses/src/domain"
 	"github.com/JaneKetko/Buses/src/routemanager/mocks"
+
 	"github.com/stretchr/testify/assert"
 	"github.com/stretchr/testify/require"
 )
@@ -233,6 +234,62 @@ func TestGetAllRoutes(t *testing.T) {
 		tc := tc
 		t.Run(tc.name, func(t *testing.T) {
 			rt, err := routeman.GetRoutes(ctx)
+			require.Equal(t, tc.expectedError, err)
+			assert.Equal(t, tc.expectedRoutes, rt)
+		})
+	}
+	routestrg.AssertExpectations(t)
+}
+
+func TestGetCurrentRoutes(t *testing.T) {
+
+	routes := []domain.Route{
+		{
+			Points: domain.Points{
+				StartPoint: "Minsk",
+				EndPoint:   "Vitebsk",
+			},
+			Start:     time.Date(2030, 02, 12, 10, 0, 0, 0, time.UTC),
+			Cost:      1000,
+			FreeSeats: 12,
+			AllSeats:  13,
+		},
+		{
+			Points: domain.Points{
+				StartPoint: "Minsk",
+				EndPoint:   "Lida",
+			},
+			Start:     time.Date(2031, 04, 10, 10, 0, 0, 0, time.UTC),
+			Cost:      1000,
+			FreeSeats: 12,
+			AllSeats:  13,
+		},
+	}
+
+	ctx, cancel := context.WithTimeout(context.Background(), 5*time.Second)
+	defer cancel()
+	var routestrg mocks.RouteStorage
+	routeman := NewRouteManager(&routestrg)
+
+	testCases := []struct {
+		name           string
+		expectedRoutes []domain.Route
+		expectedError  error
+	}{
+		{
+			name:           "successful test",
+			expectedRoutes: routes,
+			expectedError:  nil,
+		},
+	}
+	for _, tc := range testCases {
+		routestrg.On("GetCurrentData", ctx).Return(tc.expectedRoutes, tc.expectedError)
+	}
+
+	for _, tc := range testCases {
+		tc := tc
+		t.Run(tc.name, func(t *testing.T) {
+			rt, err := routeman.GetCurrentRoutes(ctx)
 			require.Equal(t, tc.expectedError, err)
 			assert.Equal(t, tc.expectedRoutes, rt)
 		})

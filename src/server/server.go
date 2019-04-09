@@ -51,6 +51,28 @@ func (b *BusStation) getRoutes(w http.ResponseWriter, r *http.Request) {
 	}
 }
 
+func (b *BusStation) getCurrentRoutes(w http.ResponseWriter, r *http.Request) {
+	w.Header().Set("Content-Type", "application/json")
+
+	rts, err := b.routes.GetCurrentRoutes(r.Context())
+	if err != nil {
+		http.Error(w, err.Error(), http.StatusInternalServerError)
+		return
+	}
+
+	rserver := make([]routeServer, 0)
+	for _, rt := range rts {
+		route := routeToRouteServer(rt)
+		rserver = append(rserver, route)
+	}
+
+	err = json.NewEncoder(w).Encode(rserver)
+	if err != nil {
+		http.Error(w, err.Error(), http.StatusBadRequest)
+		return
+	}
+}
+
 func (b *BusStation) getRoute(w http.ResponseWriter, r *http.Request) {
 	w.Header().Set("Content-Type", "application/json")
 	params := mux.Vars(r)
@@ -175,15 +197,16 @@ func (b *BusStation) managerHandlers() *mux.Router {
 		Methods(http.MethodGet)
 	router.HandleFunc("/routes/buy/{id}", b.buyTicket).Methods(http.MethodPost)
 	router.HandleFunc("/routes", b.getRoutes).Methods(http.MethodGet)
+	router.HandleFunc("/buses", b.getCurrentRoutes).Methods(http.MethodGet)
 	router.HandleFunc("/routes/add", b.createRoute).Methods(http.MethodPost)
 	router.HandleFunc("/routes/{id}", b.getRoute).Methods(http.MethodGet)
 	router.HandleFunc("/routes/{id}", b.deleteRoute).Methods(http.MethodDelete)
 	return router
 }
 
-//StartServer - Start work with server
-func (b *BusStation) StartServer() {
-	fmt.Printf("Started server at http://localhost%v.\n", b.config.PortServer)
+//RunServer - Start work with server
+func (b *BusStation) RunServer() {
+	fmt.Printf("Started server at http://localhost%v.\n", b.config.PortRESTServer)
 	router := b.managerHandlers()
-	log.Fatal(http.ListenAndServe(b.config.PortServer, router))
+	log.Fatal(http.ListenAndServe(b.config.PortRESTServer, router))
 }

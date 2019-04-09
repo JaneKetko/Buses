@@ -4,6 +4,8 @@ go 1.12
 
 require (
 	github.com/ajg/form v1.5.1 // indirect
+	github.com/daviddengcn/go-colortext v0.0.0-20180409174941-186a3d44e920 // indirect
+	github.com/dixonwille/wmenu v4.0.2+incompatible
 	github.com/fatih/camelcase v1.0.0 // indirect
 	github.com/fatih/structs v1.1.0 // indirect
 	github.com/gavv/httpexpect v0.0.0-20180803094507-bdde30871313
@@ -15,6 +17,7 @@ require (
 	github.com/grpc-ecosystem/grpc-gateway v1.8.5
 	github.com/imkira/go-interpol v1.1.0 // indirect
 	github.com/koding/multiconfig v0.0.0-20171124222453-69c27309b2d7
+	github.com/mattn/go-isatty v0.0.7 // indirect
 	github.com/moul/http2curl v1.0.0 // indirect
 	github.com/sergi/go-diff v1.0.0 // indirect
 	github.com/stretchr/testify v1.3.0
@@ -28,5 +31,6 @@ require (
 	golang.org/x/net v0.0.0-20190327025741-74e053c68e29 // indirect
 	google.golang.org/genproto v0.0.0-20190401181712-f467c93bbac2
 	google.golang.org/grpc v1.19.1
+	gopkg.in/dixonwille/wlog.v2 v2.0.0 // indirect
 	gopkg.in/yaml.v2 v2.2.2 // indirect
 )
