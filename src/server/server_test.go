@@ -23,9 +23,9 @@ func forGetRoutes(t *testing.T, method, path string) {
 	}
 	var routestrg mocks.RouteStorage
 	routeman := routemanager.NewRouteManager(&routestrg)
-	busstation := NewBusStation(routeman, cfg)
+	serv := NewRESTServer(routeman, cfg)
 
-	s := busstation.managerHandlers()
+	s := serv.managerHandlers()
 	server := httptest.NewServer(s)
 	defer server.Close()
 	e := httpexpect.New(t, server.URL)
@@ -72,7 +72,7 @@ func forGetRoutes(t *testing.T, method, path string) {
 
 	var rtstrg mocks.RouteStorage
 	routeman = routemanager.NewRouteManager(&rtstrg)
-	busstation = NewBusStation(routeman, cfg)
+	busstation := NewRESTServer(routeman, cfg)
 
 	s = busstation.managerHandlers()
 	server = httptest.NewServer(s)
@@ -101,7 +101,7 @@ func TestGetRoute(t *testing.T) {
 	}
 	var routestrg mocks.RouteStorage
 	routeman := routemanager.NewRouteManager(&routestrg)
-	busstation := NewBusStation(routeman, cfg)
+	busstation := NewRESTServer(routeman, cfg)
 
 	s := busstation.managerHandlers()
 	server := httptest.NewServer(s)
@@ -172,7 +172,7 @@ func TestCreateRoute(t *testing.T) {
 	}
 	var routestrg mocks.RouteStorage
 	routeman := routemanager.NewRouteManager(&routestrg)
-	busstation := NewBusStation(routeman, cfg)
+	busstation := NewRESTServer(routeman, cfg)
 
 	s := busstation.managerHandlers()
 	server := httptest.NewServer(s)
@@ -245,7 +245,7 @@ func TestDeleteRoute(t *testing.T) {
 	}
 	var routestrg mocks.RouteStorage
 	routeman := routemanager.NewRouteManager(&routestrg)
-	busstation := NewBusStation(routeman, cfg)
+	busstation := NewRESTServer(routeman, cfg)
 
 	s := busstation.managerHandlers()
 	server := httptest.NewServer(s)
@@ -299,7 +299,7 @@ func TestSearchRoutes(t *testing.T) {
 	}
 	var routestrg mocks.RouteStorage
 	routeman := routemanager.NewRouteManager(&routestrg)
-	busstation := NewBusStation(routeman, cfg)
+	busstation := NewRESTServer(routeman, cfg)
 
 	s := busstation.managerHandlers()
 	server := httptest.NewServer(s)
@@ -396,7 +396,7 @@ func TestBuyTicket(t *testing.T) {
 	}
 	var routestrg mocks.RouteStorage
 	routeman := routemanager.NewRouteManager(&routestrg)
-	busstation := NewBusStation(routeman, cfg)
+	busstation := NewRESTServer(routeman, cfg)
 
 	s := busstation.managerHandlers()
 	server := httptest.NewServer(s)

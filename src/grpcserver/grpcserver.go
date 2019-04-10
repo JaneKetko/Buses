@@ -17,22 +17,22 @@ import (
 	"github.com/golang/protobuf/ptypes"
 )
 
-//Server - struct for server.
-type Server struct {
+//GRPSServer - struct for server.
+type GRPSServer struct {
 	manager *routemanager.RouteManager
 	config  *config.Config
 }
 
-//NewServer - init server.
-func NewServer(r *routemanager.RouteManager, c *config.Config) *Server {
-	return &Server{
+//NewGRPSServer - init server.
+func NewGRPSServer(r *routemanager.RouteManager, c *config.Config) *GRPSServer {
+	return &GRPSServer{
 		manager: r,
 		config:  c,
 	}
 }
 
 //RunServer - start serving.
-func (s *Server) RunServer() {
+func (s *GRPSServer) RunServer() {
 
 	lis, err := net.Listen("tcp", s.config.PortGRPCServer)
 	if err != nil {
@@ -48,7 +48,7 @@ func (s *Server) RunServer() {
 
 }
 
-func (s *Server) convertTypes(route domain.Route) (*pb.BusRoute, error) {
+func convertTypes(route domain.Route) (*pb.BusRoute, error) {
 	date, err := ptypes.TimestampProto(route.Start)
 	if err != nil {
 		return nil, err
@@ -68,15 +68,15 @@ func (s *Server) convertTypes(route domain.Route) (*pb.BusRoute, error) {
 }
 
 //GetRoutes - get all routes.
-func (s *Server) GetRoutes(ctx context.Context, in *pb.Nothing) (*pb.ListRoutes, error) {
-	routes, err := s.manager.GetRoutes(ctx)
+func (s *GRPSServer) GetRoutes(ctx context.Context, in *pb.Nothing) (*pb.ListRoutes, error) {
+	routes, err := s.manager.GetCurrentRoutes(ctx)
 	if err != nil {
 		return nil, err
 	}
 
 	busrt := make([]*pb.BusRoute, 0)
 	for _, route := range routes {
-		busroute, err := s.convertTypes(route)
+		busroute, err := convertTypes(route)
 		if err != nil {
 			return nil, err
 		}
@@ -87,13 +87,13 @@ func (s *Server) GetRoutes(ctx context.Context, in *pb.Nothing) (*pb.ListRoutes,
 }
 
 //GetRoute - get route by id.
-func (s *Server) GetRoute(ctx context.Context, in *pb.IDRequest) (*pb.SingleRoute, error) {
+func (s *GRPSServer) GetRoute(ctx context.Context, in *pb.IDRequest) (*pb.SingleRoute, error) {
 	route, err := s.manager.GetRouteByID(ctx, int(in.ID))
 	if err != nil {
 		return nil, err
 	}
 
-	busroute, err := s.convertTypes(*route)
+	busroute, err := convertTypes(*route)
 	if err != nil {
 		return nil, err
 	}
@@ -102,7 +102,7 @@ func (s *Server) GetRoute(ctx context.Context, in *pb.IDRequest) (*pb.SingleRout
 }
 
 //CreateRoute - create route.
-func (s *Server) CreateRoute(ctx context.Context, in *pb.SingleRoute) (*pb.Nothing, error) {
+func (s *GRPSServer) CreateRoute(ctx context.Context, in *pb.SingleRoute) (*pb.Nothing, error) {
 	date, err := ptypes.Timestamp(in.Route.Start)
 	if err != nil {
 		return nil, err
@@ -129,7 +129,7 @@ func (s *Server) CreateRoute(ctx context.Context, in *pb.SingleRoute) (*pb.Nothi
 }
 
 //DeleteRoute - delete route by id.
-func (s *Server) DeleteRoute(ctx context.Context, in *pb.IDRequest) (*pb.Nothing, error) {
+func (s *GRPSServer) DeleteRoute(ctx context.Context, in *pb.IDRequest) (*pb.Nothing, error) {
 	err := s.manager.DeleteRoute(ctx, int(in.ID))
 	if err != nil {
 		return nil, err
@@ -139,7 +139,7 @@ func (s *Server) DeleteRoute(ctx context.Context, in *pb.IDRequest) (*pb.Nothing
 }
 
 //BuyTicket - buy ticket for one route.
-func (s *Server) BuyTicket(ctx context.Context, in *pb.IDRequest) (*pb.TicketResponse, error) {
+func (s *GRPSServer) BuyTicket(ctx context.Context, in *pb.IDRequest) (*pb.TicketResponse, error) {
 	tick, err := s.manager.BuyTicket(ctx, int(in.ID))
 	if err != nil {
 		return nil, err
@@ -164,7 +164,7 @@ func (s *Server) BuyTicket(ctx context.Context, in *pb.IDRequest) (*pb.TicketRes
 }
 
 //SearchRoutes - search routes with datetime and endpoint.
-func (s *Server) SearchRoutes(ctx context.Context, in *pb.Search) (*pb.ListRoutes, error) {
+func (s *GRPSServer) SearchRoutes(ctx context.Context, in *pb.Search) (*pb.ListRoutes, error) {
 	date, err := time.Parse("2006-01-02", in.StartTime)
 	if err != nil {
 		return nil, domain.ErrInvalidDate
@@ -176,7 +176,7 @@ func (s *Server) SearchRoutes(ctx context.Context, in *pb.Search) (*pb.ListRoute
 
 	busrt := make([]*pb.BusRoute, 0)
 	for _, route := range routes {
-		busroute, err := s.convertTypes(route)
+		busroute, err := convertTypes(route)
 		if err != nil {
 			return nil, err
 		}

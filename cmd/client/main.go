@@ -1,13 +1,13 @@
 package main
 
 import (
-	"context"
 	"log"
-	"time"
+
+	"github.com/JaneKetko/Buses/src/client"
 
 	"google.golang.org/grpc"
 
-	pb "github.com/JaneKetko/Buses/api/proto"
+	"github.com/JaneKetko/Buses/api/proto"
 )
 
 func main() {
@@ -16,19 +16,9 @@ func main() {
 		log.Fatalf("did not connect: %v", err)
 	}
 
-	c := pb.NewBusesManagerClient(conn)
-	ctx, cancel := context.WithTimeout(context.Background(), 5*time.Second)
-	defer cancel()
+	c := proto.NewBusesManagerClient(conn)
 
-	id := 13
-
-	buyreq := pb.IDRequest{
-		ID: int64(id),
-	}
-
-	buyres, err := c.BuyTicket(ctx, &buyreq)
-	if err != nil {
-		log.Fatalf("You haven't bought ticket: %v", err)
-	}
-	log.Printf("You have bought ticket successfully! Your ticket: %v", buyres)
+	cln := client.NewClient("admin", "admin", c)
+	srv := client.NewServer(cln)
+	srv.RunServer(":8080")
 }

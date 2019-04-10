@@ -109,7 +109,7 @@ func (dbmanager *DBManager) GetAllData(ctx context.Context) ([]domain.Route, err
 	return getData(ctx, dbmanager, req)
 }
 
-//GetCurrentRoutes gets current buses. Their start time equal or greater than today.
+//GetCurrentData gets current buses. Their start time equal or greater than today.
 func (dbmanager *DBManager) GetCurrentData(ctx context.Context) ([]domain.Route, error) {
 
 	req := `SELECT r.id_route, r.starttime, r.cost, r.freeseats, r.allseats,

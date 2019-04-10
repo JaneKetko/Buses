@@ -21,7 +21,7 @@ func TestGetRoutes(t *testing.T) {
 	}
 	var routestrg mocks.RouteStorage
 	routeman := routemanager.NewRouteManager(&routestrg)
-	s := NewServer(routeman, cfg)
+	s := NewGRPSServer(routeman, cfg)
 	ctx, cancel := context.WithTimeout(context.Background(), 5*time.Second)
 	defer cancel()
 
@@ -56,7 +56,7 @@ func TestGetRoutes(t *testing.T) {
 		},
 	}
 
-	routestrg.On("GetAllData", ctx).Return(testCases[0].expectedRoutes, testCases[0].expectedError)
+	routestrg.On("GetCurrentData", ctx).Return(testCases[0].expectedRoutes, testCases[0].expectedError)
 	t.Run(testCases[0].name, func(t *testing.T) {
 		_, err := s.GetRoutes(ctx, &proto.Nothing{})
 		require.NoError(t, err)
@@ -64,9 +64,9 @@ func TestGetRoutes(t *testing.T) {
 
 	var rtstrg mocks.RouteStorage
 	routeman = routemanager.NewRouteManager(&rtstrg)
-	s = NewServer(routeman, cfg)
+	s = NewGRPSServer(routeman, cfg)
 
-	rtstrg.On("GetAllData", ctx).Return(testCases[1].expectedRoutes, testCases[1].expectedError)
+	rtstrg.On("GetCurrentData", ctx).Return(testCases[1].expectedRoutes, testCases[1].expectedError)
 	t.Run(testCases[1].name, func(t *testing.T) {
 		_, err := s.GetRoutes(ctx, &proto.Nothing{})
 		require.Equal(t, err, testCases[1].expectedError)
@@ -81,7 +81,7 @@ func TestGetRoute(t *testing.T) {
 	}
 	var routestrg mocks.RouteStorage
 	routeman := routemanager.NewRouteManager(&routestrg)
-	s := NewServer(routeman, cfg)
+	s := NewGRPSServer(routeman, cfg)
 	ctx, cancel := context.WithTimeout(context.Background(), 5*time.Second)
 	defer cancel()
 
@@ -140,7 +140,7 @@ func TestDeleteRoute(t *testing.T) {
 	}
 	var routestrg mocks.RouteStorage
 	routeman := routemanager.NewRouteManager(&routestrg)
-	s := NewServer(routeman, cfg)
+	s := NewGRPSServer(routeman, cfg)
 	ctx, cancel := context.WithTimeout(context.Background(), 5*time.Second)
 	defer cancel()
 
@@ -181,7 +181,7 @@ func TestBuyTicket(t *testing.T) {
 	}
 	var routestrg mocks.RouteStorage
 	routeman := routemanager.NewRouteManager(&routestrg)
-	s := NewServer(routeman, cfg)
+	s := NewGRPSServer(routeman, cfg)
 
 	ticket := &domain.Ticket{
 		Points: domain.Points{
@@ -236,7 +236,7 @@ func TestSearchRoutes(t *testing.T) {
 	}
 	var routestrg mocks.RouteStorage
 	routeman := routemanager.NewRouteManager(&routestrg)
-	s := NewServer(routeman, cfg)
+	s := NewGRPSServer(routeman, cfg)
 
 	routes := []domain.Route{
 		{
@@ -338,7 +338,7 @@ func TestCreateRoute(t *testing.T) {
 	}
 	var routestrg mocks.RouteStorage
 	routeman := routemanager.NewRouteManager(&routestrg)
-	s := NewServer(routeman, cfg)
+	s := NewGRPSServer(routeman, cfg)
 	ctx, cancel := context.WithTimeout(context.Background(), 5*time.Second)
 	defer cancel()
 	routes := []domain.Route{
@@ -413,7 +413,7 @@ func TestCreateRoute(t *testing.T) {
 	for _, tc := range testCases {
 		tc := tc
 		t.Run(tc.name, func(t *testing.T) {
-			r, err := s.convertTypes(*tc.route)
+			r, err := convertTypes(*tc.route)
 			require.NoError(t, err)
 			_, err = s.CreateRoute(ctx, &proto.SingleRoute{Route: r})
 			require.Equal(t, tc.expTotalError, err)

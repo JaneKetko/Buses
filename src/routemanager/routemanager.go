@@ -33,6 +33,7 @@ func (r RouteManager) GetRoutes(ctx context.Context) ([]domain.Route, error) {
 	return r.storage.GetAllData(ctx)
 }
 
+//GetCurrentRoutes gets routes with current data.
 func (r RouteManager) GetCurrentRoutes(ctx context.Context) ([]domain.Route, error) {
 	return r.storage.GetCurrentData(ctx)
 }
@@ -64,6 +65,10 @@ func (r *RouteManager) DeleteRoute(ctx context.Context, id int) error {
 //SearchRoutes chooses routes by date and point.
 func (r RouteManager) SearchRoutes(ctx context.Context,
 	date time.Time, endpoint string) ([]domain.Route, error) {
+
+	if date.Before(time.Now()) {
+		return nil, domain.ErrInvalidDate
+	}
 
 	routes, err := r.storage.RoutesByEndPoint(ctx, endpoint)
 	if err != nil {

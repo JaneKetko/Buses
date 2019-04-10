@@ -25,7 +25,7 @@ func TestRoutesByEndPoint(t *testing.T) {
 				StartPoint: "Vitebsk",
 				EndPoint:   "Minsk",
 			},
-			Start:     time.Date(2019, 04, 23, 10, 0, 0, 0, time.UTC),
+			Start:     time.Date(2022, 04, 23, 10, 0, 0, 0, time.UTC),
 			Cost:      1000,
 			FreeSeats: 12,
 			AllSeats:  13,
@@ -36,7 +36,7 @@ func TestRoutesByEndPoint(t *testing.T) {
 				StartPoint: "Grodno",
 				EndPoint:   "Minsk",
 			},
-			Start:     time.Date(2019, 04, 12, 10, 0, 0, 0, time.UTC),
+			Start:     time.Date(2022, 04, 12, 10, 0, 0, 0, time.UTC),
 			Cost:      1000,
 			FreeSeats: 12,
 			AllSeats:  13,
@@ -68,7 +68,7 @@ func TestRoutesByEndPoint(t *testing.T) {
 	}{
 		{
 			name:           "successful test",
-			date:           time.Date(2019, 04, 12, 10, 0, 0, 0, time.UTC),
+			date:           time.Date(2022, 04, 12, 10, 0, 0, 0, time.UTC),
 			endPoint:       "Minsk",
 			expectedRoutes: routes[:2],
 			expectedError:  nil,
@@ -77,7 +77,7 @@ func TestRoutesByEndPoint(t *testing.T) {
 		},
 		{
 			name:           "no routes by endpoint",
-			date:           time.Date(2019, 04, 10, 10, 0, 0, 0, time.UTC),
+			date:           time.Date(2022, 04, 10, 10, 0, 0, 0, time.UTC),
 			endPoint:       "Grodno",
 			expectedRoutes: nil,
 			expectedError:  domain.ErrNoRoutesByEndPoint,
@@ -92,6 +92,15 @@ func TestRoutesByEndPoint(t *testing.T) {
 			expectedError:  nil,
 			expTotalRoutes: nil,
 			expTotalError:  domain.ErrNoRoutes,
+		},
+		{
+			name:           "invalid date",
+			date:           time.Date(2018, 04, 10, 10, 0, 0, 0, time.UTC),
+			endPoint:       "Mir",
+			expectedRoutes: routes[2:],
+			expectedError:  nil,
+			expTotalRoutes: nil,
+			expTotalError:  domain.ErrInvalidDate,
 		},
 	}
 
