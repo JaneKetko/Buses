@@ -3,11 +3,11 @@
 run: 
 	./bin/server & ./bin/client
 
-grpcserver:
-	go run cmd/server-grpc/main.go
+run-service:
+	go run cmd/service/main.go
 
-restserver:
-	go run cmd/server-rest/main.go
+run-grpcserver:
+	go run cmd/grpcserver/main.go
 
 run-client:
 	go run cmd/client/main.go
