@@ -13,7 +13,7 @@ run-client:
 	go run cmd/client/main.go
 
 build_server:
-	go build -o ./bin/server github.com/JaneKetko/Buses/cmd/server-grpc
+	go build -o ./bin/server github.com/JaneKetko/Buses/cmd/grpcserver
 
 build_client:
 	go build -o ./bin/client github.com/JaneKetko/Buses/cmd/client

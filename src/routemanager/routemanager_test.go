@@ -6,8 +6,8 @@ import (
 	"testing"
 	"time"
 
-	"github.com/JaneKetko/Buses/src/domain"
 	"github.com/JaneKetko/Buses/src/routemanager/mocks"
+	"github.com/JaneKetko/Buses/src/stores/domain"
 
 	"github.com/stretchr/testify/assert"
 	"github.com/stretchr/testify/require"
@@ -212,7 +212,7 @@ func TestGetAllRoutes(t *testing.T) {
 				StartPoint: "Vitebsk",
 				EndPoint:   "Minsk",
 			},
-			Start:     time.Date(2019, 04, 23, 10, 0, 0, 0, time.UTC),
+			Start:     time.Date(2020, 04, 23, 10, 0, 0, 0, time.UTC),
 			Cost:      1000,
 			FreeSeats: 12,
 			AllSeats:  13,
@@ -314,7 +314,7 @@ func TestGetRouteByID(t *testing.T) {
 				StartPoint: "Vitebsk",
 				EndPoint:   "Minsk",
 			},
-			Start:     time.Date(2019, 04, 23, 10, 0, 0, 0, time.UTC),
+			Start:     time.Date(2020, 04, 23, 10, 0, 0, 0, time.UTC),
 			Cost:      1000,
 			FreeSeats: 12,
 			AllSeats:  13,
@@ -407,7 +407,7 @@ func TestTakePlaceInBus(t *testing.T) {
 			StartPoint: "Minsk",
 			EndPoint:   "Vitebsk",
 		},
-		StartTime: time.Date(2019, 04, 23, 10, 0, 0, 0, time.UTC),
+		StartTime: time.Date(2020, 04, 23, 10, 0, 0, 0, time.UTC),
 		Cost:      1000,
 		Place:     10,
 	}

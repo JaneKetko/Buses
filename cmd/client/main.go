@@ -3,11 +3,10 @@ package main
 import (
 	"log"
 
-	"github.com/JaneKetko/Buses/src/client"
-
 	"google.golang.org/grpc"
 
 	"github.com/JaneKetko/Buses/api/proto"
+	cl "github.com/JaneKetko/Buses/src/client/workserver"
 )
 
 func main() {
@@ -18,7 +17,7 @@ func main() {
 
 	c := proto.NewBusesManagerClient(conn)
 
-	cln := client.NewClient("admin", "admin", c)
-	srv := client.NewServer(cln)
+	cln := cl.NewClient("admin", "admin", c)
+	srv := cl.NewServer(cln)
 	srv.RunServer(":8080")
 }

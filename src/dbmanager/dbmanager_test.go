@@ -9,7 +9,7 @@ import (
 	"time"
 
 	"github.com/JaneKetko/Buses/src/config"
-	"github.com/JaneKetko/Buses/src/domain"
+	"github.com/JaneKetko/Buses/src/stores/domain"
 
 	"github.com/stretchr/testify/assert"
 	"github.com/stretchr/testify/require"

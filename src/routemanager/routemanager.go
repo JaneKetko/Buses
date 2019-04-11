@@ -4,7 +4,7 @@ import (
 	"context"
 	"time"
 
-	"github.com/JaneKetko/Buses/src/domain"
+	"github.com/JaneKetko/Buses/src/stores/domain"
 )
 
 //RouteStorage - interface for database methods.
@@ -88,7 +88,7 @@ func (r RouteManager) SearchRoutes(ctx context.Context,
 	return routesDate, nil
 }
 
-//BuyTicket takes one place in bus by client
+//BuyTicket takes one place in bus by client.
 func (r RouteManager) BuyTicket(ctx context.Context, id int) (*domain.Ticket, error) {
 	return r.storage.TakePlace(ctx, id)
 }

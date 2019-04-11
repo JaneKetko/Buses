@@ -34,7 +34,7 @@ type Points struct {
 	EndPoint   string
 }
 
-//Ticket - struct for storing info about taked ticket
+//Ticket - struct for storing info about taked ticket.
 type Ticket struct {
 	Points    Points
 	StartTime time.Time

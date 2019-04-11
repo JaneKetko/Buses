@@ -12,9 +12,10 @@ import (
 	"github.com/stretchr/testify/mock"
 
 	"github.com/JaneKetko/Buses/src/config"
-	"github.com/JaneKetko/Buses/src/domain"
 	"github.com/JaneKetko/Buses/src/routemanager"
 	"github.com/JaneKetko/Buses/src/routemanager/mocks"
+	"github.com/JaneKetko/Buses/src/stores/domain"
+	sst "github.com/JaneKetko/Buses/src/stores/serverstore"
 )
 
 func forGetRoutes(t *testing.T, method, path string) {
@@ -37,7 +38,7 @@ func forGetRoutes(t *testing.T, method, path string) {
 				StartPoint: "Vitebsk",
 				EndPoint:   "Minsk",
 			},
-			Start:     time.Date(2019, 04, 23, 10, 0, 0, 0, time.UTC),
+			Start:     time.Date(2020, 04, 23, 10, 0, 0, 0, time.UTC),
 			Cost:      1000,
 			FreeSeats: 12,
 			AllSeats:  13,
@@ -84,6 +85,9 @@ func forGetRoutes(t *testing.T, method, path string) {
 		res := e.Request(http.MethodGet, path).Expect()
 		res.Status(testCases[1].expectedStatus)
 	})
+
+	routestrg.AssertExpectations(t)
+	rtstrg.AssertExpectations(t)
 }
 
 func TestGetRoutes(t *testing.T) {
@@ -114,7 +118,7 @@ func TestGetRoute(t *testing.T) {
 				StartPoint: "Vitebsk",
 				EndPoint:   "Minsk",
 			},
-			Start:     time.Date(2019, 04, 23, 10, 0, 0, 0, time.UTC),
+			Start:     time.Date(2020, 04, 23, 10, 0, 0, 0, time.UTC),
 			Cost:      1000,
 			FreeSeats: 12,
 			AllSeats:  13,
@@ -153,7 +157,7 @@ func TestGetRoute(t *testing.T) {
 			expectedError:  domain.ErrNoRoutes,
 		},
 	}
-	for _, tc := range testCases {
+	for _, tc := range testCases[:2] {
 		routestrg.On("RouteByID", mock.Anything, tc.routeID).Return(tc.expectedRoute, tc.expectedError)
 	}
 
@@ -164,6 +168,8 @@ func TestGetRoute(t *testing.T) {
 			res.Status(tc.expectedStatus)
 		})
 	}
+
+	routestrg.AssertExpectations(t)
 }
 
 func TestCreateRoute(t *testing.T) {
@@ -223,7 +229,7 @@ func TestCreateRoute(t *testing.T) {
 		},
 	}
 
-	for _, tc := range testCases {
+	for _, tc := range testCases[1:] {
 		routestrg.On("AddRoute", mock.Anything,
 			tc.route).
 			Return(tc.expectedID, tc.expectedError)
@@ -233,10 +239,11 @@ func TestCreateRoute(t *testing.T) {
 		tc := tc
 		t.Run(tc.name, func(t *testing.T) {
 			res := e.Request(http.MethodPost, "/routes/add").WithHeader("Content-Type", "application/json").
-				WithJSON(routeToRouteServer(*tc.route)).Expect()
+				WithJSON(sst.RouteToRouteServer(*tc.route)).Expect()
 			res.Status(tc.expectedStatus)
 		})
 	}
+	routestrg.AssertExpectations(t)
 }
 
 func TestDeleteRoute(t *testing.T) {
@@ -281,7 +288,7 @@ func TestDeleteRoute(t *testing.T) {
 		},
 	}
 
-	for _, tc := range testCases {
+	for _, tc := range testCases[:2] {
 		routestrg.On("DeleteRow", mock.Anything, tc.routeID).Return(tc.expectedError)
 	}
 
@@ -292,6 +299,7 @@ func TestDeleteRoute(t *testing.T) {
 			res.Status(tc.expectedStatus)
 		})
 	}
+	routestrg.AssertExpectations(t)
 }
 func TestSearchRoutes(t *testing.T) {
 	cfg := &config.Config{
@@ -313,7 +321,7 @@ func TestSearchRoutes(t *testing.T) {
 				StartPoint: "Vitebsk",
 				EndPoint:   "Minsk",
 			},
-			Start:     time.Date(2019, 04, 23, 10, 0, 0, 0, time.UTC),
+			Start:     time.Date(2020, 04, 23, 10, 0, 0, 0, time.UTC),
 			Cost:      1000,
 			FreeSeats: 12,
 			AllSeats:  13,
@@ -324,7 +332,7 @@ func TestSearchRoutes(t *testing.T) {
 				StartPoint: "Grodno",
 				EndPoint:   "Minsk",
 			},
-			Start:     time.Date(2019, 04, 12, 10, 0, 0, 0, time.UTC),
+			Start:     time.Date(2020, 04, 12, 10, 0, 0, 0, time.UTC),
 			Cost:      1000,
 			FreeSeats: 12,
 			AllSeats:  13,
@@ -335,7 +343,7 @@ func TestSearchRoutes(t *testing.T) {
 				StartPoint: "Pinsk",
 				EndPoint:   "Mir",
 			},
-			Start:     time.Date(2019, 04, 10, 10, 0, 0, 0, time.UTC),
+			Start:     time.Date(2020, 04, 10, 10, 0, 0, 0, time.UTC),
 			Cost:      1000,
 			FreeSeats: 12,
 			AllSeats:  13,
@@ -352,7 +360,7 @@ func TestSearchRoutes(t *testing.T) {
 	}{
 		{
 			name:           "successful test",
-			date:           "2019-04-12",
+			date:           "2020-04-12",
 			endPoint:       "Minsk",
 			expectedStatus: http.StatusOK,
 			expectedRoutes: routes[:2],
@@ -360,7 +368,7 @@ func TestSearchRoutes(t *testing.T) {
 		},
 		{
 			name:           "no routes by endpoint",
-			date:           "2019-04-10",
+			date:           "2020-04-10",
 			endPoint:       "Grodno",
 			expectedStatus: http.StatusInternalServerError,
 			expectedRoutes: nil,
@@ -388,74 +396,5 @@ func TestSearchRoutes(t *testing.T) {
 			res.Status(tc.expectedStatus)
 		})
 	}
-}
-
-func TestBuyTicket(t *testing.T) {
-	cfg := &config.Config{
-		PortRESTServer: ":8000",
-	}
-	var routestrg mocks.RouteStorage
-	routeman := routemanager.NewRouteManager(&routestrg)
-	busstation := NewRESTServer(routeman, cfg)
-
-	s := busstation.managerHandlers()
-	server := httptest.NewServer(s)
-	defer server.Close()
-	e := httpexpect.New(t, server.URL)
-
-	ticket := &domain.Ticket{
-		Points: domain.Points{
-			StartPoint: "Minsk",
-			EndPoint:   "Vitebsk",
-		},
-		StartTime: time.Date(2019, 04, 23, 10, 0, 0, 0, time.UTC),
-		Cost:      1000,
-		Place:     10,
-	}
-
-	testCases := []struct {
-		name           string
-		routeID        int
-		paramID        string
-		expectedTicket *domain.Ticket
-		expectedError  error
-		expectedStatus int
-	}{
-		{
-			name:           "successful test",
-			routeID:        1,
-			paramID:        "1",
-			expectedTicket: ticket,
-			expectedError:  nil,
-			expectedStatus: http.StatusOK,
-		},
-		{
-			name:           "invalid id",
-			routeID:        1,
-			paramID:        "sdvsd",
-			expectedTicket: ticket,
-			expectedError:  nil,
-			expectedStatus: http.StatusBadRequest,
-		},
-		{
-			name:           "errors",
-			routeID:        2,
-			paramID:        "2",
-			expectedTicket: nil,
-			expectedError:  domain.ErrNoRoutes,
-			expectedStatus: http.StatusInternalServerError,
-		},
-	}
-
-	for _, tc := range testCases {
-		routestrg.On("TakePlace", mock.Anything, tc.routeID).Return(tc.expectedTicket, tc.expectedError)
-	}
-
-	for _, tc := range testCases {
-		tc := tc
-		t.Run(tc.name, func(t *testing.T) {
-			res := e.Request(http.MethodPost, "/routes/buy/"+tc.paramID).Expect()
-			res.Status(tc.expectedStatus)
-		})
-	}
+	routestrg.AssertExpectations(t)
 }

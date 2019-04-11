@@ -8,9 +8,9 @@ import (
 
 	"github.com/JaneKetko/Buses/api/proto"
 	"github.com/JaneKetko/Buses/src/config"
-	"github.com/JaneKetko/Buses/src/domain"
 	"github.com/JaneKetko/Buses/src/routemanager"
 	"github.com/JaneKetko/Buses/src/routemanager/mocks"
+	"github.com/JaneKetko/Buses/src/stores/domain"
 
 	"github.com/stretchr/testify/require"
 )

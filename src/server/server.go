@@ -9,8 +9,9 @@ import (
 	"time"
 
 	"github.com/JaneKetko/Buses/src/config"
-	"github.com/JaneKetko/Buses/src/domain"
 	"github.com/JaneKetko/Buses/src/routemanager"
+	"github.com/JaneKetko/Buses/src/stores/domain"
+	sst "github.com/JaneKetko/Buses/src/stores/serverstore"
 
 	"github.com/gorilla/mux"
 )
@@ -38,9 +39,9 @@ func (b *RESTServer) getRoutes(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	rserver := make([]routeServer, 0)
+	rserver := make([]sst.RouteServer, 0)
 	for _, rt := range rts {
-		route := routeToRouteServer(rt)
+		route := sst.RouteToRouteServer(rt)
 		rserver = append(rserver, route)
 	}
 
@@ -60,9 +61,9 @@ func (b *RESTServer) getCurrentRoutes(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	rserver := make([]routeServer, 0)
+	rserver := make([]sst.RouteServer, 0)
 	for _, rt := range rts {
-		route := routeToRouteServer(rt)
+		route := sst.RouteToRouteServer(rt)
 		rserver = append(rserver, route)
 	}
 
@@ -88,7 +89,7 @@ func (b *RESTServer) getRoute(w http.ResponseWriter, r *http.Request) {
 		http.Error(w, err.Error(), http.StatusInternalServerError)
 		return
 	}
-	rserver := routeToRouteServer(*route)
+	rserver := sst.RouteToRouteServer(*route)
 	err = json.NewEncoder(w).Encode(&rserver)
 	if err != nil {
 		http.Error(w, err.Error(), http.StatusBadRequest)
@@ -98,21 +99,21 @@ func (b *RESTServer) getRoute(w http.ResponseWriter, r *http.Request) {
 
 func (b *RESTServer) createRoute(w http.ResponseWriter, r *http.Request) {
 	w.Header().Set("Content-Type", "application/json")
-	var rserver routeServer
+	var rserver sst.RouteServer
 	err := json.NewDecoder(r.Body).Decode(&rserver)
 	if err != nil {
 		http.Error(w, err.Error(), http.StatusBadRequest)
 		return
 	}
 
-	route := routeServerToRoute(rserver)
+	route := sst.RouteServerToRoute(rserver)
 	err = b.routes.CreateRoute(r.Context(), &route)
 	if err != nil {
 		http.Error(w, err.Error(), http.StatusBadRequest)
 		return
 	}
 
-	rsencode := routeToRouteServer(route)
+	rsencode := sst.RouteToRouteServer(route)
 	err = json.NewEncoder(w).Encode(&rsencode)
 	if err != nil {
 		http.Error(w, err.Error(), http.StatusBadRequest)
@@ -142,27 +143,6 @@ func (b *RESTServer) deleteRoute(w http.ResponseWriter, r *http.Request) {
 	}
 }
 
-func (b *RESTServer) buyTicket(w http.ResponseWriter, r *http.Request) {
-	w.Header().Set("Content-Type", "application/json")
-	params := mux.Vars(r)
-	id, err := strconv.Atoi(params["id"])
-	if err != nil {
-		http.Error(w, err.Error(), http.StatusBadRequest)
-		return
-	}
-	ticket, err := b.routes.BuyTicket(r.Context(), id)
-	if err != nil {
-		http.Error(w, err.Error(), http.StatusInternalServerError)
-		return
-	}
-	t := convertTicket(*ticket)
-	err = json.NewEncoder(w).Encode(&t)
-	if err != nil {
-		http.Error(w, err.Error(), http.StatusBadRequest)
-		return
-	}
-}
-
 func (b *RESTServer) searchRoutes(w http.ResponseWriter, r *http.Request) {
 	w.Header().Set("Content-Type", "application/json")
 	params := mux.Vars(r)
@@ -179,9 +159,9 @@ func (b *RESTServer) searchRoutes(w http.ResponseWriter, r *http.Request) {
 		http.Error(w, err.Error(), http.StatusInternalServerError)
 		return
 	}
-	rserver := make([]routeServer, 0)
+	rserver := make([]sst.RouteServer, 0)
 	for _, rt := range routesDate {
-		route := routeToRouteServer(rt)
+		route := sst.RouteToRouteServer(rt)
 		rserver = append(rserver, route)
 	}
 	err = json.NewEncoder(w).Encode(rserver)
@@ -195,7 +175,6 @@ func (b *RESTServer) managerHandlers() *mux.Router {
 	router := mux.NewRouter()
 	router.HandleFunc("/route_search", b.searchRoutes).Queries("date", "{date}", "point", "{point}").
 		Methods(http.MethodGet)
-	router.HandleFunc("/routes/buy/{id}", b.buyTicket).Methods(http.MethodPost)
 	router.HandleFunc("/routes", b.getRoutes).Methods(http.MethodGet)
 	router.HandleFunc("/buses", b.getCurrentRoutes).Methods(http.MethodGet)
 	router.HandleFunc("/routes/add", b.createRoute).Methods(http.MethodPost)
@@ -204,7 +183,7 @@ func (b *RESTServer) managerHandlers() *mux.Router {
 	return router
 }
 
-//RunServer - Start work with server
+//RunServer - Start work with server.
 func (b *RESTServer) RunServer() {
 	fmt.Printf("Started server at http://localhost%v.\n", b.config.PortRESTServer)
 	router := b.managerHandlers()

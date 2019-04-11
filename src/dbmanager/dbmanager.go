@@ -9,7 +9,7 @@ import (
 	"time"
 
 	"github.com/JaneKetko/Buses/src/config"
-	"github.com/JaneKetko/Buses/src/domain"
+	"github.com/JaneKetko/Buses/src/stores/domain"
 )
 
 //RouteDB - struct for describing route from db.
@@ -275,7 +275,7 @@ func (dbmanager *DBManager) AddRoute(ctx context.Context, r *domain.Route) (int,
 	return int(idRoute), nil
 }
 
-//TakePlace takes one place in bus
+//TakePlace takes one place in bus.
 func (dbmanager *DBManager) TakePlace(ctx context.Context, id int) (*domain.Ticket, error) {
 
 	var routeDB RouteDB

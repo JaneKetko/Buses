@@ -11,8 +11,8 @@ import (
 
 	pb "github.com/JaneKetko/Buses/api/proto"
 	"github.com/JaneKetko/Buses/src/config"
-	"github.com/JaneKetko/Buses/src/domain"
 	"github.com/JaneKetko/Buses/src/routemanager"
+	"github.com/JaneKetko/Buses/src/stores/domain"
 
 	"github.com/golang/protobuf/ptypes"
 )
@@ -67,7 +67,7 @@ func convertTypes(route domain.Route) (*pb.BusRoute, error) {
 	return busroute, nil
 }
 
-//GetRoutes - get all routes.
+//GetRoutes - get only cuurent routes.
 func (s *GRPSServer) GetRoutes(ctx context.Context, in *pb.Nothing) (*pb.ListRoutes, error) {
 	routes, err := s.manager.GetCurrentRoutes(ctx)
 	if err != nil {
