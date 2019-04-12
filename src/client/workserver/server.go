@@ -2,6 +2,7 @@ package workserver
 
 import (
 	"log"
+	"net"
 	"net/http"
 
 	"github.com/gorilla/mux"
@@ -18,7 +19,12 @@ func NewServer(c *Client) *Server {
 }
 
 //RunServer starts working with client.
-func (s *Server) RunServer(addr string) {
-	log.Println("Client has started working...")
-	log.Fatal(http.ListenAndServe(addr, s.router))
+func (s *Server) RunServer() {
+	listener, err := net.Listen("tcp", ":0")
+	if err != nil {
+		log.Fatal(err)
+	}
+
+	log.Printf("Client has started working...\nAddress: http://localhost:%d", listener.Addr().(*net.TCPAddr).Port)
+	log.Fatal(http.Serve(listener, s.router))
 }

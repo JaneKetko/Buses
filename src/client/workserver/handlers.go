@@ -2,6 +2,7 @@ package workserver
 
 import (
 	"encoding/json"
+	"fmt"
 	"log"
 	"net/http"
 	"strconv"
@@ -144,10 +145,11 @@ func (c *Client) SearchBuses(w http.ResponseWriter, r *http.Request) {
 //Handlers initializes main handle functions.
 func (c *Client) Handlers() *mux.Router {
 	router := mux.NewRouter()
-	router.HandleFunc("/routes/buy/{id}", c.BuyTicket).Methods(http.MethodPost)
-	router.HandleFunc("/buses", c.ViewBuses).Methods(http.MethodGet)
-	router.HandleFunc("/route_search", c.SearchBuses).Queries("date", "{date}", "point", "{point}").
+	router.HandleFunc(fmt.Sprintf("/%s/routes/buy/{id}", c.Username), c.BuyTicket).Methods(http.MethodPost)
+	router.HandleFunc(fmt.Sprintf("/%s/buses", c.Username), c.ViewBuses).Methods(http.MethodGet)
+	router.HandleFunc(fmt.Sprintf("/%s/route_search", c.Username), c.SearchBuses).
+		Queries("date", "{date}", "point", "{point}").
 		Methods(http.MethodGet)
-	router.HandleFunc("/routes/{id}", c.FindBusByID).Methods(http.MethodGet)
+	router.HandleFunc(fmt.Sprintf("/%s/routes/{id}", c.Username), c.FindBusByID).Methods(http.MethodGet)
 	return router
 }

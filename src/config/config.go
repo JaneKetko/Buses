@@ -6,13 +6,17 @@ import (
 
 //Config - struct for project info.
 type Config struct {
+	//Port for connecting with GRPC server.
 	PortGRPCServer string `default:":8001"`
+	//Port for connecting with REST server.
 	PortRESTServer string `default:":8000"`
-	Login          string `default:"root"`
-	Passwd         string `default:"root"`
-	Hostname       string `default:"172.17.0.2"`
-	Port           int    `default:"3306"`
-	DBName         string `default:"busstation"`
+
+	//Info for connecting with mysql database.
+	Login    string `default:"root"`
+	Passwd   string `default:"root"`
+	Hostname string `default:"172.17.0.4"`
+	Port     int    `default:"3306"`
+	DBName   string `default:"busstation"`
 }
 
 //GetData - get data from config file(new config object).
