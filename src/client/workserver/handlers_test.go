@@ -81,7 +81,7 @@ func TestBuyTicket(t *testing.T) {
 	for _, tc := range testCases {
 		tc := tc
 		t.Run(tc.name, func(t *testing.T) {
-			res := e.Request(http.MethodPost, "/routes/buy/"+tc.paramID).Expect()
+			res := e.Request(http.MethodPost, "/jane/routes/buy/"+tc.paramID).Expect()
 			res.Status(tc.expectedStatus)
 		})
 	}
@@ -138,7 +138,7 @@ func TestViewBuses(t *testing.T) {
 		Return(&proto.ListRoutes{BusRoutes: testCases[0].expectedRoutes}, testCases[0].expectedError)
 
 	t.Run(testCases[0].name, func(t *testing.T) {
-		res := e.Request(http.MethodGet, "/buses").Expect()
+		res := e.Request(http.MethodGet, "/jane/buses").Expect()
 		res.Status(testCases[0].expectedStatus)
 	})
 
@@ -153,7 +153,7 @@ func TestViewBuses(t *testing.T) {
 		Return(&proto.ListRoutes{BusRoutes: testCases[1].expectedRoutes}, testCases[1].expectedError)
 
 	t.Run(testCases[1].name, func(t *testing.T) {
-		res := e.Request(http.MethodGet, "/buses").Expect()
+		res := e.Request(http.MethodGet, "/jane/buses").Expect()
 		res.Status(testCases[1].expectedStatus)
 	})
 	cl.AssertExpectations(t)
@@ -225,7 +225,7 @@ func TestFindBusByID(t *testing.T) {
 	for _, tc := range testCases {
 		tc := tc
 		t.Run(tc.name, func(t *testing.T) {
-			res := e.Request(http.MethodGet, "/routes/"+tc.paramID).Expect()
+			res := e.Request(http.MethodGet, "/jane/routes/"+tc.paramID).Expect()
 			res.Status(tc.expectedStatus)
 		})
 	}
@@ -325,7 +325,7 @@ func TestSearchBuses(t *testing.T) {
 	for _, tc := range testCases {
 		tc := tc
 		t.Run(tc.name, func(t *testing.T) {
-			res := e.Request(http.MethodGet, "/route_search").
+			res := e.Request(http.MethodGet, "/jane/route_search").
 				WithQueryString(fmt.Sprintf("date=%s&point=%s", tc.date, tc.endPoint)).Expect()
 			res.Status(tc.expectedStatus)
 		})
