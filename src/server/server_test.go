@@ -28,7 +28,6 @@ func forGetRoutes(t *testing.T, method, path string) {
 
 	s := serv.managerHandlers()
 	server := httptest.NewServer(s)
-	defer server.Close()
 	e := httpexpect.New(t, server.URL)
 
 	routes := []domain.Route{
@@ -71,9 +70,10 @@ func forGetRoutes(t *testing.T, method, path string) {
 		res.Status(testCases[0].expectedStatus)
 	})
 
+	server.Close()
 	var rtstrg mocks.RouteStorage
-	routeman = routemanager.NewRouteManager(&rtstrg)
-	busstation := NewRESTServer(routeman, cfg)
+	rt := routemanager.NewRouteManager(&rtstrg)
+	busstation := NewRESTServer(rt, cfg)
 
 	s = busstation.managerHandlers()
 	server = httptest.NewServer(s)
