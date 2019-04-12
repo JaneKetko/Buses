@@ -6,9 +6,6 @@ run:
 run-service:
 	go run cmd/service/main.go
 
-run-grpcserver:
-	go run cmd/grpcserver/main.go
-
 run-client:
 	go run cmd/client/main.go
 
@@ -19,6 +16,9 @@ build_client:
 	go build -o ./bin/client github.com/JaneKetko/Buses/cmd/client
 
 build: build_server build_client
+
+test:
+	go test -v ./... -race -coverprofile=coverage.txt -covermode=atomic GOCACHE=off
 
 lint:
 	golangci-lint run \
