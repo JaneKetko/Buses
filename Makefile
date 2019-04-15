@@ -1,7 +1,7 @@
 # Makefile
 
 run: 
-	./bin/server & ./bin/client
+	./bin/service & ./bin/client
 
 run-service:
 	go run cmd/service/main.go
@@ -9,13 +9,13 @@ run-service:
 run-client:
 	go run cmd/client/main.go
 
-build_server:
-	go build -o ./bin/server github.com/JaneKetko/Buses/cmd/grpcserver
+build_service:
+	go build -o ./bin/service github.com/JaneKetko/Buses/cmd/service
 
 build_client:
 	go build -o ./bin/client github.com/JaneKetko/Buses/cmd/client
 
-build: build_server build_client
+build: build_service build_client
 
 test:
 	go test -v ./... -race -coverprofile=coverage.txt -covermode=atomic GOCACHE=off
