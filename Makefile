@@ -1,12 +1,24 @@
 # Makefile
 
-run:
-	go get -d
-	go run *.go
+run: 
+	./bin/service & ./bin/client
 
-build:
-	go get -d
-	go build -o out.bin
+run-service:
+	go run cmd/service/main.go
+
+run-client:
+	go run cmd/client/main.go
+
+build_service:
+	go build -o ./bin/service github.com/JaneKetko/Buses/cmd/service
+
+build_client:
+	go build -o ./bin/client github.com/JaneKetko/Buses/cmd/client
+
+build: build_service build_client
+
+test:
+	go test -v ./... -race -coverprofile=coverage.txt -covermode=atomic GOCACHE=off
 
 lint:
 	golangci-lint run \
@@ -27,3 +39,4 @@ lint:
 		--enable=gochecknoinits \
 		--gocyclo.min-complexity 10 \
 		./...
+

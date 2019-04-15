@@ -1,0 +1,59 @@
+syntax = "proto3";
+
+package proto;
+
+import "google/protobuf/timestamp.proto";
+
+service BusesManager {
+    rpc GetRoutes(Nothing) returns (ListRoutes);
+    rpc GetRoute(IDRequest) returns (SingleRoute);
+    rpc CreateRoute(SingleRoute) returns (Nothing);
+    rpc DeleteRoute(IDRequest) returns (Nothing);
+    rpc SearchRoutes(Search) returns (ListRoutes);
+    rpc BuyTicket(IDRequest) returns (TicketResponse);
+}
+
+message Search {
+    string StartTime = 1;
+    string EndPoint  = 2;
+}
+
+message Nothing {
+}
+
+message SingleRoute {
+    BusRoute Route = 1;
+}
+
+message IDRequest {
+    int64 ID = 1;
+}
+
+message ListRoutes {
+    repeated BusRoute BusRoutes = 1;
+}
+
+message BusRoute {
+    int64 ID               = 1; 
+    RoutePoints Points     = 2;
+    google.protobuf.Timestamp Start = 3;
+    int64 Cost           = 4;
+	int64 FreeSeats       = 5;
+    int64 AllSeats      = 6;
+}
+
+message RoutePoints {
+    string StartPoint  = 1;
+	string EndPoint    = 2;
+}
+
+message TicketResponse{
+    Ticket Ticket = 1;
+}
+
+message Ticket {
+    RoutePoints Points = 1;
+	google.protobuf.Timestamp Start = 2;
+	int64 Cost           = 3;
+	int64 Place      = 4;
+}
