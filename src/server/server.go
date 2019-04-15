@@ -39,7 +39,7 @@ func (b *RESTServer) getRoutes(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	rserver := make([]sst.RouteServer, 0)
+	rserver := make([]sst.RouteForServer, 0)
 	for _, rt := range rts {
 		route := sst.RouteToRouteServer(rt)
 		rserver = append(rserver, route)
@@ -61,7 +61,7 @@ func (b *RESTServer) getCurrentRoutes(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	rserver := make([]sst.RouteServer, 0)
+	rserver := make([]sst.RouteForServer, 0)
 	for _, rt := range rts {
 		route := sst.RouteToRouteServer(rt)
 		rserver = append(rserver, route)
@@ -99,7 +99,7 @@ func (b *RESTServer) getRoute(w http.ResponseWriter, r *http.Request) {
 
 func (b *RESTServer) createRoute(w http.ResponseWriter, r *http.Request) {
 	w.Header().Set("Content-Type", "application/json")
-	var rserver sst.RouteServer
+	var rserver sst.RouteForServer
 	err := json.NewDecoder(r.Body).Decode(&rserver)
 	if err != nil {
 		http.Error(w, err.Error(), http.StatusBadRequest)
@@ -109,7 +109,7 @@ func (b *RESTServer) createRoute(w http.ResponseWriter, r *http.Request) {
 	route := sst.RouteServerToRoute(rserver)
 	err = b.routes.CreateRoute(r.Context(), &route)
 	if err != nil {
-		http.Error(w, err.Error(), http.StatusBadRequest)
+		http.Error(w, err.Error(), http.StatusInternalServerError)
 		return
 	}
 
@@ -148,6 +148,10 @@ func (b *RESTServer) searchRoutes(w http.ResponseWriter, r *http.Request) {
 	params := mux.Vars(r)
 	searchDate := params["date"]
 	endpoint := params["point"]
+	if endpoint == "" {
+		http.Error(w, domain.ErrInvalidArg.Error(), http.StatusBadRequest)
+		return
+	}
 	date, err := time.Parse("2006-01-02", searchDate)
 	if err != nil {
 		http.Error(w, domain.ErrInvalidDate.Error(), http.StatusBadRequest)
@@ -159,7 +163,7 @@ func (b *RESTServer) searchRoutes(w http.ResponseWriter, r *http.Request) {
 		http.Error(w, err.Error(), http.StatusInternalServerError)
 		return
 	}
-	rserver := make([]sst.RouteServer, 0)
+	rserver := make([]sst.RouteForServer, 0)
 	for _, rt := range routesDate {
 		route := sst.RouteToRouteServer(rt)
 		rserver = append(rserver, route)

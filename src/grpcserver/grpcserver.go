@@ -13,6 +13,7 @@ import (
 	"github.com/JaneKetko/Buses/src/config"
 	"github.com/JaneKetko/Buses/src/routemanager"
 	"github.com/JaneKetko/Buses/src/stores/domain"
+	sst "github.com/JaneKetko/Buses/src/stores/serverstore"
 
 	"github.com/golang/protobuf/ptypes"
 )
@@ -48,25 +49,6 @@ func (s *GRPSServer) RunServer() {
 
 }
 
-func convertTypes(route domain.Route) (*pb.BusRoute, error) {
-	date, err := ptypes.TimestampProto(route.Start)
-	if err != nil {
-		return nil, err
-	}
-	busroute := &pb.BusRoute{
-		ID: int64(route.ID),
-		Points: &pb.RoutePoints{
-			StartPoint: route.Points.StartPoint,
-			EndPoint:   route.Points.EndPoint,
-		},
-		Start:     date,
-		Cost:      int64(route.Cost),
-		FreeSeats: int64(route.FreeSeats),
-		AllSeats:  int64(route.AllSeats),
-	}
-	return busroute, nil
-}
-
 //GetRoutes - get only cuurent routes.
 func (s *GRPSServer) GetRoutes(ctx context.Context, in *pb.Nothing) (*pb.ListRoutes, error) {
 	routes, err := s.manager.GetCurrentRoutes(ctx)
@@ -76,7 +58,7 @@ func (s *GRPSServer) GetRoutes(ctx context.Context, in *pb.Nothing) (*pb.ListRou
 
 	busrt := make([]*pb.BusRoute, 0)
 	for _, route := range routes {
-		busroute, err := convertTypes(route)
+		busroute, err := sst.RouteToPType(route)
 		if err != nil {
 			return nil, err
 		}
@@ -93,7 +75,7 @@ func (s *GRPSServer) GetRoute(ctx context.Context, in *pb.IDRequest) (*pb.Single
 		return nil, err
 	}
 
-	busroute, err := convertTypes(*route)
+	busroute, err := sst.RouteToPType(*route)
 	if err != nil {
 		return nil, err
 	}
@@ -176,7 +158,7 @@ func (s *GRPSServer) SearchRoutes(ctx context.Context, in *pb.Search) (*pb.ListR
 
 	busrt := make([]*pb.BusRoute, 0)
 	for _, route := range routes {
-		busroute, err := convertTypes(route)
+		busroute, err := sst.RouteToPType(route)
 		if err != nil {
 			return nil, err
 		}

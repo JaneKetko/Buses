@@ -315,9 +315,17 @@ func TestSearchBuses(t *testing.T) {
 			expectedRoutes: nil,
 			expectedError:  domain.ErrNoRoutesByEndPoint,
 		},
+		{
+			name:           "invalid arguments",
+			date:           "2020-04-10",
+			endPoint:       "",
+			expectedStatus: http.StatusBadRequest,
+			expectedRoutes: nil,
+			expectedError:  domain.ErrNoRoutesByEndPoint,
+		},
 	}
 
-	for _, tc := range testCases {
+	for _, tc := range testCases[:3] {
 		cl.On("SearchRoutes", mock.Anything, &proto.Search{StartTime: tc.date, EndPoint: tc.endPoint}).
 			Return(&proto.ListRoutes{BusRoutes: tc.expectedRoutes}, tc.expectedError)
 	}

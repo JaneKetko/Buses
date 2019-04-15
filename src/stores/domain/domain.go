@@ -16,6 +16,8 @@ var (
 	ErrNoRoutesByEndPoint = errors.New("no such routes by this endpoint")
 	//ErrInvalidDate - error for invalid date argument.
 	ErrInvalidDate = errors.New("invalid date argument")
+	//ErrInvalidArg - error with invallid arguments.
+	ErrInvalidArg = errors.New("invalid arguments")
 )
 
 //Route - struct for describing route of any bus.

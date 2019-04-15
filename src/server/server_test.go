@@ -216,7 +216,7 @@ func TestCreateRoute(t *testing.T) {
 		{
 			name:           "errors",
 			route:          &routes[0],
-			expectedStatus: http.StatusBadRequest,
+			expectedStatus: http.StatusInternalServerError,
 			expectedID:     1,
 			expectedError:  domain.ErrInvalidDate,
 		},
@@ -382,9 +382,17 @@ func TestSearchRoutes(t *testing.T) {
 			expectedRoutes: nil,
 			expectedError:  domain.ErrNoRoutesByEndPoint,
 		},
+		{
+			name:           "invalid arguments",
+			date:           "2019-04",
+			endPoint:       "",
+			expectedStatus: http.StatusBadRequest,
+			expectedRoutes: nil,
+			expectedError:  domain.ErrInvalidArg,
+		},
 	}
 
-	for _, tc := range testCases {
+	for _, tc := range testCases[:3] {
 		routestrg.On("RoutesByEndPoint", mock.Anything, tc.endPoint).Return(tc.expectedRoutes, tc.expectedError)
 	}
 

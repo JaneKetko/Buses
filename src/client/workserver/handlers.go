@@ -8,6 +8,7 @@ import (
 	"strconv"
 
 	"github.com/JaneKetko/Buses/api/proto"
+	"github.com/JaneKetko/Buses/src/stores/domain"
 	sst "github.com/JaneKetko/Buses/src/stores/serverstore"
 
 	"github.com/gorilla/mux"
@@ -61,7 +62,7 @@ func (c *Client) BuyTicket(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	ticket, err := sst.ConvertTicketPType(reply.Ticket)
+	ticket, err := sst.TicketPTypeToJSON(reply.Ticket)
 	if err != nil {
 		http.Error(w, err.Error(), http.StatusInternalServerError)
 		return
@@ -79,7 +80,7 @@ func (c *Client) ViewBuses(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	routes := make([]*sst.RouteServer, 0)
+	routes := make([]*sst.RouteForServer, 0)
 	for _, rt := range reply.BusRoutes {
 		route, err := sst.PtypeBusToJSON(rt)
 		if err != nil {
@@ -122,14 +123,17 @@ func (c *Client) SearchBuses(w http.ResponseWriter, r *http.Request) {
 	params := mux.Vars(r)
 	searchDate := params["date"]
 	endpoint := params["point"]
-
+	if endpoint == "" {
+		http.Error(w, domain.ErrInvalidArg.Error(), http.StatusBadRequest)
+		return
+	}
 	reply, err := c.grpccl.SearchRoutes(r.Context(), &proto.Search{StartTime: searchDate, EndPoint: endpoint})
 	if err != nil {
 		http.Error(w, err.Error(), http.StatusInternalServerError)
 		return
 	}
 
-	routes := make([]*sst.RouteServer, 0)
+	routes := make([]*sst.RouteForServer, 0)
 	for _, rt := range reply.BusRoutes {
 		route, err := sst.PtypeBusToJSON(rt)
 		if err != nil {

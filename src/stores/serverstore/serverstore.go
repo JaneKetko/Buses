@@ -9,35 +9,35 @@ import (
 	"github.com/golang/protobuf/ptypes"
 )
 
-//RouteServer - struct for storing info about route for decoding and encoding.
-type RouteServer struct {
-	ID        int          `json:"id"`
-	Points    PointsServer `json:"points"`
-	Start     time.Time    `json:"start_time"`
-	Cost      float32      `json:"cost"`
-	FreeSeats int          `json:"freeseats"`
-	AllSeats  int          `json:"allseats"`
+//RouteForServer - struct for storing info about route for decoding and encoding.
+type RouteForServer struct {
+	ID        int             `json:"id"`
+	Points    PointsForServer `json:"points"`
+	Start     time.Time       `json:"start_time"`
+	Cost      float32         `json:"cost"`
+	FreeSeats int             `json:"freeseats"`
+	AllSeats  int             `json:"allseats"`
 }
 
-//PointsServer - struct for showing points of route for decoding and encoding.
-type PointsServer struct {
+//PointsForServer - struct for showing points of route for decoding and encoding.
+type PointsForServer struct {
 	StartPoint string `json:"startpoint"`
 	EndPoint   string `json:"endpoint"`
 }
 
-//TicketServer - struct for ticket info.
-type TicketServer struct {
-	Points PointsServer `json:"route"`
-	Start  time.Time    `json:"start_time"`
-	Cost   float32      `json:"cost"`
-	Place  int          `json:"place"`
+//TicketForServer - struct for ticket info.
+type TicketForServer struct {
+	Points PointsForServer `json:"route"`
+	Start  time.Time       `json:"start_time"`
+	Cost   float32         `json:"cost"`
+	Place  int             `json:"place"`
 }
 
-//ConvertTicket converts domain.Ticket to TicketServer.
-func ConvertTicket(t domain.Ticket) TicketServer {
+//TicketToJSON converts domain.Ticket to TicketServer.
+func TicketToJSON(t domain.Ticket) TicketForServer {
 	cost := float32(t.Cost) / 100
-	ticket := TicketServer{
-		Points: PointsServer{
+	ticket := TicketForServer{
+		Points: PointsForServer{
 			StartPoint: t.Points.StartPoint,
 			EndPoint:   t.Points.EndPoint},
 		Start: t.StartTime,
@@ -48,7 +48,7 @@ func ConvertTicket(t domain.Ticket) TicketServer {
 }
 
 //RouteServerToRoute convert routeServer to domain.Route.
-func RouteServerToRoute(rServer RouteServer) domain.Route {
+func RouteServerToRoute(rServer RouteForServer) domain.Route {
 	cost := int(rServer.Cost * 100)
 	route := domain.Route{
 		ID: rServer.ID,
@@ -63,12 +63,12 @@ func RouteServerToRoute(rServer RouteServer) domain.Route {
 	return route
 }
 
-//RouteToRouteServer convert domain.Route to routeServer.
-func RouteToRouteServer(r domain.Route) RouteServer {
+//RouteToRouteServer convert domain.Route to RouteForServer.
+func RouteToRouteServer(r domain.Route) RouteForServer {
 	cost := float32(r.Cost) / 100
-	route := RouteServer{
+	route := RouteForServer{
 		ID: r.ID,
-		Points: PointsServer{
+		Points: PointsForServer{
 			StartPoint: r.Points.StartPoint,
 			EndPoint:   r.Points.EndPoint},
 		Start:     r.Start,
@@ -79,17 +79,17 @@ func RouteToRouteServer(r domain.Route) RouteServer {
 	return route
 }
 
-//PtypeBusToJSON converts Bus in proto to RouteServer.
-func PtypeBusToJSON(in *proto.BusRoute) (*RouteServer, error) {
+//PtypeBusToJSON converts Bus in proto to RouteForServer.
+func PtypeBusToJSON(in *proto.BusRoute) (*RouteForServer, error) {
 	cost := float32(in.Cost) / 100
 	date, err := ptypes.Timestamp(in.Start)
 	if err != nil {
 		return nil, err
 	}
 
-	route := &RouteServer{
+	route := &RouteForServer{
 		ID: int(in.ID),
-		Points: PointsServer{
+		Points: PointsForServer{
 			StartPoint: in.Points.StartPoint,
 			EndPoint:   in.Points.EndPoint,
 		},
@@ -102,16 +102,36 @@ func PtypeBusToJSON(in *proto.BusRoute) (*RouteServer, error) {
 	return route, nil
 }
 
-//ConvertTicketPType converts proto.Ticket to TicketServer.
-func ConvertTicketPType(in *proto.Ticket) (*TicketServer, error) {
+//RouteToPType converts domain.Route to Bus in proto.
+func RouteToPType(route domain.Route) (*proto.BusRoute, error) {
+	date, err := ptypes.TimestampProto(route.Start)
+	if err != nil {
+		return nil, err
+	}
+	busroute := &proto.BusRoute{
+		ID: int64(route.ID),
+		Points: &proto.RoutePoints{
+			StartPoint: route.Points.StartPoint,
+			EndPoint:   route.Points.EndPoint,
+		},
+		Start:     date,
+		Cost:      int64(route.Cost),
+		FreeSeats: int64(route.FreeSeats),
+		AllSeats:  int64(route.AllSeats),
+	}
+	return busroute, nil
+}
+
+//TicketPTypeToJSON converts proto.Ticket to TicketServer.
+func TicketPTypeToJSON(in *proto.Ticket) (*TicketForServer, error) {
 	cost := float32(in.Cost) / 100
 	date, err := ptypes.Timestamp(in.Start)
 	if err != nil {
 		return nil, err
 	}
 
-	ticket := &TicketServer{
-		Points: PointsServer{
+	ticket := &TicketForServer{
+		Points: PointsForServer{
 			StartPoint: in.Points.StartPoint,
 			EndPoint:   in.Points.EndPoint,
 		},

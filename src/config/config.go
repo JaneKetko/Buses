@@ -14,7 +14,7 @@ type Config struct {
 	//Info for connecting with mysql database.
 	Login    string `default:"root"`
 	Passwd   string `default:"root"`
-	Hostname string `default:"172.17.0.4"`
+	Hostname string `default:"172.17.0.2"`
 	Port     int    `default:"3306"`
 	DBName   string `default:"busstation"`
 }

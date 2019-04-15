@@ -11,6 +11,7 @@ import (
 	"github.com/JaneKetko/Buses/src/routemanager"
 	"github.com/JaneKetko/Buses/src/routemanager/mocks"
 	"github.com/JaneKetko/Buses/src/stores/domain"
+	"github.com/JaneKetko/Buses/src/stores/serverstore"
 
 	"github.com/stretchr/testify/require"
 )
@@ -413,7 +414,7 @@ func TestCreateRoute(t *testing.T) {
 	for _, tc := range testCases {
 		tc := tc
 		t.Run(tc.name, func(t *testing.T) {
-			r, err := convertTypes(*tc.route)
+			r, err := serverstore.RouteToPType(*tc.route)
 			require.NoError(t, err)
 			_, err = s.CreateRoute(ctx, &proto.SingleRoute{Route: r})
 			require.Equal(t, tc.expTotalError, err)
