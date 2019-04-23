@@ -7,7 +7,6 @@ import (
 	"time"
 
 	"github.com/JaneKetko/Buses/api/proto"
-	"github.com/JaneKetko/Buses/src/config"
 	"github.com/JaneKetko/Buses/src/routemanager"
 	"github.com/JaneKetko/Buses/src/routemanager/mocks"
 	"github.com/JaneKetko/Buses/src/stores/domain"
@@ -16,13 +15,15 @@ import (
 	"github.com/stretchr/testify/require"
 )
 
+const (
+	port = ":8000"
+)
+
 func TestGetRoutes(t *testing.T) {
-	cfg := &config.Config{
-		PortGRPCServer: ":8000",
-	}
+
 	var routestrg mocks.RouteStorage
 	routeman := routemanager.NewRouteManager(&routestrg)
-	s := NewGRPSServer(routeman, cfg)
+	s := NewGRPCServer(routeman, port)
 	ctx, cancel := context.WithTimeout(context.Background(), 5*time.Second)
 	defer cancel()
 
@@ -65,7 +66,7 @@ func TestGetRoutes(t *testing.T) {
 
 	var rtstrg mocks.RouteStorage
 	routeman = routemanager.NewRouteManager(&rtstrg)
-	s = NewGRPSServer(routeman, cfg)
+	s = NewGRPCServer(routeman, port)
 
 	rtstrg.On("GetCurrentData", ctx).Return(testCases[1].expectedRoutes, testCases[1].expectedError)
 	t.Run(testCases[1].name, func(t *testing.T) {
@@ -77,12 +78,10 @@ func TestGetRoutes(t *testing.T) {
 }
 
 func TestGetRoute(t *testing.T) {
-	cfg := &config.Config{
-		PortGRPCServer: ":8000",
-	}
+
 	var routestrg mocks.RouteStorage
 	routeman := routemanager.NewRouteManager(&routestrg)
-	s := NewGRPSServer(routeman, cfg)
+	s := NewGRPCServer(routeman, port)
 	ctx, cancel := context.WithTimeout(context.Background(), 5*time.Second)
 	defer cancel()
 
@@ -136,12 +135,9 @@ func TestGetRoute(t *testing.T) {
 
 func TestDeleteRoute(t *testing.T) {
 
-	cfg := &config.Config{
-		PortGRPCServer: ":8000",
-	}
 	var routestrg mocks.RouteStorage
 	routeman := routemanager.NewRouteManager(&routestrg)
-	s := NewGRPSServer(routeman, cfg)
+	s := NewGRPCServer(routeman, port)
 	ctx, cancel := context.WithTimeout(context.Background(), 5*time.Second)
 	defer cancel()
 
@@ -177,12 +173,10 @@ func TestDeleteRoute(t *testing.T) {
 }
 
 func TestBuyTicket(t *testing.T) {
-	cfg := &config.Config{
-		PortGRPCServer: ":8000",
-	}
+
 	var routestrg mocks.RouteStorage
 	routeman := routemanager.NewRouteManager(&routestrg)
-	s := NewGRPSServer(routeman, cfg)
+	s := NewGRPCServer(routeman, port)
 
 	ticket := &domain.Ticket{
 		Points: domain.Points{
@@ -232,12 +226,9 @@ func TestBuyTicket(t *testing.T) {
 }
 
 func TestSearchRoutes(t *testing.T) {
-	cfg := &config.Config{
-		PortGRPCServer: ":8000",
-	}
 	var routestrg mocks.RouteStorage
 	routeman := routemanager.NewRouteManager(&routestrg)
-	s := NewGRPSServer(routeman, cfg)
+	s := NewGRPCServer(routeman, port)
 
 	routes := []domain.Route{
 		{
@@ -334,12 +325,9 @@ func TestSearchRoutes(t *testing.T) {
 }
 
 func TestCreateRoute(t *testing.T) {
-	cfg := &config.Config{
-		PortGRPCServer: ":8000",
-	}
 	var routestrg mocks.RouteStorage
 	routeman := routemanager.NewRouteManager(&routestrg)
-	s := NewGRPSServer(routeman, cfg)
+	s := NewGRPCServer(routeman, port)
 	ctx, cancel := context.WithTimeout(context.Background(), 5*time.Second)
 	defer cancel()
 	routes := []domain.Route{

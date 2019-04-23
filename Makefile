@@ -1,25 +1,24 @@
 # Makefile
 
 run: 
-	./bin/service & ./bin/client
+	./cmd/service/service & ./cmd/client/client
 
 run-service:
-	go run cmd/service/main.go
+	./cmd/service/service
 
 run-client:
-	go run cmd/client/main.go
+	./cmd/client/client -c :8002
 
 build_service:
-	go build -o ./bin/service github.com/JaneKetko/Buses/cmd/service
+	CGO_ENABLED=0 go build -o ./cmd/service/service github.com/JaneKetko/Buses/cmd/service
 
 build_client:
-	go build -o ./bin/client github.com/JaneKetko/Buses/cmd/client
+	CGO_ENABLED=0 go build -o ./cmd/client/client github.com/JaneKetko/Buses/cmd/client
 
 build: build_service build_client
 
 test:
 	go test -v ./... -race -coverprofile=coverage.txt -covermode=atomic GOCACHE=off
-
 lint:
 	golangci-lint run \
 		--exclude-use-default=false \

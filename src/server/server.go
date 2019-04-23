@@ -8,7 +8,6 @@ import (
 	"strconv"
 	"time"
 
-	"github.com/JaneKetko/Buses/src/config"
 	"github.com/JaneKetko/Buses/src/routemanager"
 	"github.com/JaneKetko/Buses/src/stores/domain"
 	sst "github.com/JaneKetko/Buses/src/stores/serverstore"
@@ -18,15 +17,15 @@ import (
 
 //RESTServer - struct for describing bus station: manager for work with route info and configuration for server.
 type RESTServer struct {
-	routes *routemanager.RouteManager
-	config *config.Config
+	routes  *routemanager.RouteManager
+	address string
 }
 
 //NewRESTServer - constructor for BusStation.
-func NewRESTServer(r *routemanager.RouteManager, c *config.Config) *RESTServer {
+func NewRESTServer(r *routemanager.RouteManager, addr string) *RESTServer {
 	return &RESTServer{
-		routes: r,
-		config: c,
+		routes:  r,
+		address: addr,
 	}
 }
 
@@ -189,7 +188,7 @@ func (b *RESTServer) managerHandlers() *mux.Router {
 
 //RunServer - Start work with server.
 func (b *RESTServer) RunServer() {
-	fmt.Printf("Started server at http://localhost%v.\n", b.config.PortRESTServer)
+	fmt.Printf("Started server at http://localhost%v.\n", b.address)
 	router := b.managerHandlers()
-	log.Fatal(http.ListenAndServe(b.config.PortRESTServer, router))
+	log.Fatal(http.ListenAndServe(b.address, router))
 }
