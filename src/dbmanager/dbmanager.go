@@ -51,20 +51,19 @@ func convertTypes(routeDB RouteDB) (domain.Route, error) {
 
 //DBConfig - struct for database config info.
 type DBConfig struct {
-	Login    string
-	Passwd   string
-	Hostname string
-	Port     string
-	DBName   string
+	Login   string
+	Passwd  string
+	Address string
+	DBName  string
 }
 
 //Open opens connection with database.
 func Open(cfg *DBConfig) (*sql.DB, error) {
 
-	log.Printf("Try to connect to %s:%s@tcp(%s%s)/%s\n",
-		cfg.Login, cfg.Passwd, cfg.Hostname, cfg.Port, cfg.DBName)
-	db, err := sql.Open("mysql", fmt.Sprintf("%s:%s@tcp(%s%s)/%s",
-		cfg.Login, cfg.Passwd, cfg.Hostname, cfg.Port, cfg.DBName))
+	log.Printf("Try to connect to %s:%s@tcp(%s)/%s\n",
+		cfg.Login, cfg.Passwd, cfg.Address, cfg.DBName)
+	db, err := sql.Open("mysql", fmt.Sprintf("%s:%s@tcp(%s)/%s",
+		cfg.Login, cfg.Passwd, cfg.Address, cfg.DBName))
 
 	if err != nil {
 		return nil, err

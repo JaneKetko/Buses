@@ -28,11 +28,10 @@ func main() {
 	signal.Notify(gracefulStop, syscall.SIGTERM, syscall.SIGINT)
 
 	db, err := dbmanager.Open(&dbmanager.DBConfig{
-		Login:    sett.Login,
-		Passwd:   sett.Passwd,
-		Hostname: sett.Hostname,
-		Port:     sett.Port,
-		DBName:   sett.DBName,
+		Login:   sett.Login,
+		Passwd:  sett.Passwd,
+		Address: sett.Address,
+		DBName:  sett.DBName,
 	})
 	if err != nil {
 		log.Fatal(err)

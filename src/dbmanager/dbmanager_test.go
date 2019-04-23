@@ -18,11 +18,10 @@ import (
 
 func dbOpen() (*sql.DB, error) {
 	config := &DBConfig{
-		Login:    "root",
-		Passwd:   "root",
-		Hostname: "172.17.0.2",
-		Port:     ":3306",
-		DBName:   "busstationtest",
+		Login:   "root",
+		Passwd:  "root",
+		Address: "172.17.0.2:3306",
+		DBName:  "busstationtest",
 	}
 
 	db, err := Open(config)
