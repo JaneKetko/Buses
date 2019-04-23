@@ -23,7 +23,7 @@ func TestGetRoutes(t *testing.T) {
 
 	var routestrg mocks.RouteStorage
 	routeman := routemanager.NewRouteManager(&routestrg)
-	s := NewGRPSServer(routeman, port)
+	s := NewGRPCServer(routeman, port)
 	ctx, cancel := context.WithTimeout(context.Background(), 5*time.Second)
 	defer cancel()
 
@@ -66,7 +66,7 @@ func TestGetRoutes(t *testing.T) {
 
 	var rtstrg mocks.RouteStorage
 	routeman = routemanager.NewRouteManager(&rtstrg)
-	s = NewGRPSServer(routeman, port)
+	s = NewGRPCServer(routeman, port)
 
 	rtstrg.On("GetCurrentData", ctx).Return(testCases[1].expectedRoutes, testCases[1].expectedError)
 	t.Run(testCases[1].name, func(t *testing.T) {
@@ -81,7 +81,7 @@ func TestGetRoute(t *testing.T) {
 
 	var routestrg mocks.RouteStorage
 	routeman := routemanager.NewRouteManager(&routestrg)
-	s := NewGRPSServer(routeman, port)
+	s := NewGRPCServer(routeman, port)
 	ctx, cancel := context.WithTimeout(context.Background(), 5*time.Second)
 	defer cancel()
 
@@ -137,7 +137,7 @@ func TestDeleteRoute(t *testing.T) {
 
 	var routestrg mocks.RouteStorage
 	routeman := routemanager.NewRouteManager(&routestrg)
-	s := NewGRPSServer(routeman, port)
+	s := NewGRPCServer(routeman, port)
 	ctx, cancel := context.WithTimeout(context.Background(), 5*time.Second)
 	defer cancel()
 
@@ -176,7 +176,7 @@ func TestBuyTicket(t *testing.T) {
 
 	var routestrg mocks.RouteStorage
 	routeman := routemanager.NewRouteManager(&routestrg)
-	s := NewGRPSServer(routeman, port)
+	s := NewGRPCServer(routeman, port)
 
 	ticket := &domain.Ticket{
 		Points: domain.Points{
@@ -228,7 +228,7 @@ func TestBuyTicket(t *testing.T) {
 func TestSearchRoutes(t *testing.T) {
 	var routestrg mocks.RouteStorage
 	routeman := routemanager.NewRouteManager(&routestrg)
-	s := NewGRPSServer(routeman, port)
+	s := NewGRPCServer(routeman, port)
 
 	routes := []domain.Route{
 		{
@@ -327,7 +327,7 @@ func TestSearchRoutes(t *testing.T) {
 func TestCreateRoute(t *testing.T) {
 	var routestrg mocks.RouteStorage
 	routeman := routemanager.NewRouteManager(&routestrg)
-	s := NewGRPSServer(routeman, port)
+	s := NewGRPCServer(routeman, port)
 	ctx, cancel := context.WithTimeout(context.Background(), 5*time.Second)
 	defer cancel()
 	routes := []domain.Route{

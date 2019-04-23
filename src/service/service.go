@@ -7,17 +7,22 @@ import (
 
 //Service - struct for bus servers.
 type Service struct {
-	grpc *grpcserver.GRPSServer
-	rest *server.RESTServer
+	Grpc *grpcserver.GRPCServer
+	Rest *server.RESTServer
 }
 
 //NewService - constructor for Service.
-func NewService(g *grpcserver.GRPSServer, r *server.RESTServer) *Service {
+func NewService(g *grpcserver.GRPCServer, r *server.RESTServer) *Service {
 	return &Service{g, r}
 }
 
 //RunService - start service.
 func (s *Service) RunService() {
-	go s.grpc.RunServer()
-	s.rest.RunServer()
+	go s.Grpc.RunServer()
+	s.Rest.RunServer()
+}
+
+//StopService - stop service.
+func (s *Service) StopService() {
+	s.Grpc.Srv.GracefulStop()
 }

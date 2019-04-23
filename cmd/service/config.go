@@ -16,12 +16,11 @@ type Config struct {
 	//Port for connecting with REST server.
 	PortRESTServer string `short:"r" default:":8000"`
 	ConfigFile     string `short:"f" long:"configfile" description:"File with config"`
-
-	Login    string `long:"login" default:"root"`
-	Passwd   string `long:"password" default:"root"`
-	Hostname string `long:"hostname" default:"172.18.0.2"`
-	Port     int    `short:"d" long:"dbport" default:"3306"`
-	DBName   string `long:"dbname" default:"busstation"`
+	Port           string `short:"d" long:"dbport" default:":3306"`
+	Login          string `long:"login" default:"root"`
+	Passwd         string `long:"password" default:"root"`
+	Hostname       string `long:"hostname" default:"172.18.0.2"`
+	DBName         string `long:"dbname" default:"busstation"`
 }
 
 //Parse works with command arguments.

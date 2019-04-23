@@ -21,7 +21,7 @@ func dbOpen() (*sql.DB, error) {
 		Login:    "root",
 		Passwd:   "root",
 		Hostname: "172.17.0.2",
-		Port:     3306,
+		Port:     ":3306",
 		DBName:   "busstationtest",
 	}
 

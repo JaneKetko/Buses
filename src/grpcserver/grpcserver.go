@@ -17,39 +17,40 @@ import (
 	"github.com/golang/protobuf/ptypes"
 )
 
-//GRPSServer - struct for server.
-type GRPSServer struct {
+//GRPCServer - struct for server.
+type GRPCServer struct {
 	manager *routemanager.RouteManager
 	address string
+	Srv     *grpc.Server
 }
 
 //NewGRPSServer - init server.
-func NewGRPSServer(r *routemanager.RouteManager, addr string) *GRPSServer {
-	return &GRPSServer{
+func NewGRPCServer(r *routemanager.RouteManager, addr string) *GRPCServer {
+	return &GRPCServer{
 		manager: r,
 		address: addr,
+		Srv:     grpc.NewServer(),
 	}
 }
 
 //RunServer - start serving.
-func (s *GRPSServer) RunServer() {
+func (s *GRPCServer) RunServer() {
 
 	lis, err := net.Listen("tcp", s.address)
 	if err != nil {
 		log.Fatalf("failed to listen: %v", err)
 	}
-	srv := grpc.NewServer()
-	pb.RegisterBusesManagerServer(srv, s)
-	reflection.Register(srv)
+	pb.RegisterBusesManagerServer(s.Srv, s)
+	reflection.Register(s.Srv)
 	log.Println("Started server...")
-	if err := srv.Serve(lis); err != nil {
+	if err := s.Srv.Serve(lis); err != nil {
 		log.Fatalf("errors with serving: %v", err)
 	}
 
 }
 
 //GetRoutes - get only cuurent routes.
-func (s *GRPSServer) GetRoutes(ctx context.Context, in *pb.Nothing) (*pb.ListRoutes, error) {
+func (s *GRPCServer) GetRoutes(ctx context.Context, in *pb.Nothing) (*pb.ListRoutes, error) {
 	routes, err := s.manager.GetCurrentRoutes(ctx)
 	if err != nil {
 		return nil, err
@@ -68,7 +69,7 @@ func (s *GRPSServer) GetRoutes(ctx context.Context, in *pb.Nothing) (*pb.ListRou
 }
 
 //GetRoute - get route by id.
-func (s *GRPSServer) GetRoute(ctx context.Context, in *pb.IDRequest) (*pb.SingleRoute, error) {
+func (s *GRPCServer) GetRoute(ctx context.Context, in *pb.IDRequest) (*pb.SingleRoute, error) {
 	route, err := s.manager.GetRouteByID(ctx, int(in.ID))
 	if err != nil {
 		return nil, err
@@ -83,7 +84,7 @@ func (s *GRPSServer) GetRoute(ctx context.Context, in *pb.IDRequest) (*pb.Single
 }
 
 //CreateRoute - create route.
-func (s *GRPSServer) CreateRoute(ctx context.Context, in *pb.SingleRoute) (*pb.Nothing, error) {
+func (s *GRPCServer) CreateRoute(ctx context.Context, in *pb.SingleRoute) (*pb.Nothing, error) {
 	date, err := ptypes.Timestamp(in.Route.Start)
 	if err != nil {
 		return nil, err
@@ -110,7 +111,7 @@ func (s *GRPSServer) CreateRoute(ctx context.Context, in *pb.SingleRoute) (*pb.N
 }
 
 //DeleteRoute - delete route by id.
-func (s *GRPSServer) DeleteRoute(ctx context.Context, in *pb.IDRequest) (*pb.Nothing, error) {
+func (s *GRPCServer) DeleteRoute(ctx context.Context, in *pb.IDRequest) (*pb.Nothing, error) {
 	err := s.manager.DeleteRoute(ctx, int(in.ID))
 	if err != nil {
 		return nil, err
@@ -120,7 +121,7 @@ func (s *GRPSServer) DeleteRoute(ctx context.Context, in *pb.IDRequest) (*pb.Not
 }
 
 //BuyTicket - buy ticket for one route.
-func (s *GRPSServer) BuyTicket(ctx context.Context, in *pb.IDRequest) (*pb.TicketResponse, error) {
+func (s *GRPCServer) BuyTicket(ctx context.Context, in *pb.IDRequest) (*pb.TicketResponse, error) {
 	tick, err := s.manager.BuyTicket(ctx, int(in.ID))
 	if err != nil {
 		return nil, err
@@ -145,7 +146,7 @@ func (s *GRPSServer) BuyTicket(ctx context.Context, in *pb.IDRequest) (*pb.Ticke
 }
 
 //SearchRoutes - search routes with datetime and endpoint.
-func (s *GRPSServer) SearchRoutes(ctx context.Context, in *pb.Search) (*pb.ListRoutes, error) {
+func (s *GRPCServer) SearchRoutes(ctx context.Context, in *pb.Search) (*pb.ListRoutes, error) {
 	date, err := time.Parse("2006-01-02", in.StartTime)
 	if err != nil {
 		return nil, domain.ErrInvalidDate

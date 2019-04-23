@@ -1,7 +1,11 @@
 package main
 
 import (
+	"fmt"
 	"log"
+	"os"
+	"os/signal"
+	"syscall"
 
 	"github.com/JaneKetko/Buses/src/dbmanager"
 	"github.com/JaneKetko/Buses/src/grpcserver"
@@ -20,6 +24,9 @@ func main() {
 		log.Fatalf("Cannot parse settings: %v", err)
 	}
 
+	var gracefulStop = make(chan os.Signal)
+	signal.Notify(gracefulStop, syscall.SIGTERM, syscall.SIGINT)
+
 	db, err := dbmanager.Open(&dbmanager.DBConfig{
 		Login:    sett.Login,
 		Passwd:   sett.Passwd,
@@ -33,7 +40,14 @@ func main() {
 	dbman := dbmanager.NewDBManager(db)
 	routeman := routemanager.NewRouteManager(dbman)
 	r := server.NewRESTServer(routeman, sett.PortRESTServer)
-	g := grpcserver.NewGRPSServer(routeman, sett.PortGRPCServer)
+	g := grpcserver.NewGRPCServer(routeman, sett.PortGRPCServer)
 	srvc := service.NewService(g, r)
+
+	go func() {
+		sig := <-gracefulStop
+		fmt.Printf("caught sig: %+v", sig)
+		srvc.StopService()
+		os.Exit(0)
+	}()
 	srvc.RunService()
 }

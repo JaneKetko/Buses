@@ -4,7 +4,7 @@ import (
 	"context"
 	"database/sql"
 	"fmt"
-	"strconv"
+	"log"
 	"time"
 
 	"github.com/JaneKetko/Buses/src/stores/domain"
@@ -54,15 +54,17 @@ type DBConfig struct {
 	Login    string
 	Passwd   string
 	Hostname string
-	Port     int
+	Port     string
 	DBName   string
 }
 
 //Open opens connection with database.
 func Open(cfg *DBConfig) (*sql.DB, error) {
 
-	db, err := sql.Open("mysql", fmt.Sprintf("%s:%s@tcp(%s:%s)/%s",
-		cfg.Login, cfg.Passwd, cfg.Hostname, strconv.Itoa(cfg.Port), cfg.DBName))
+	log.Printf("Try to connect to %s:%s@tcp(%s%s)/%s\n",
+		cfg.Login, cfg.Passwd, cfg.Hostname, cfg.Port, cfg.DBName)
+	db, err := sql.Open("mysql", fmt.Sprintf("%s:%s@tcp(%s%s)/%s",
+		cfg.Login, cfg.Passwd, cfg.Hostname, cfg.Port, cfg.DBName))
 
 	if err != nil {
 		return nil, err
