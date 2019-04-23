@@ -19,11 +19,12 @@ type Config struct {
 
 	Login    string `long:"login" default:"root"`
 	Passwd   string `long:"password" default:"root"`
-	Hostname string `long:"hostname" default:"172.17.0.2"`
+	Hostname string `long:"hostname" default:"172.18.0.2"`
 	Port     int    `short:"d" long:"dbport" default:"3306"`
 	DBName   string `long:"dbname" default:"busstation"`
 }
 
+//Parse works with command arguments.
 func (c *Config) Parse() error {
 	parser := flags.NewParser(c, flags.Default|flags.IgnoreUnknown)
 	_, err := parser.Parse()

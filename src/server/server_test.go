@@ -11,20 +11,21 @@ import (
 	"github.com/gavv/httpexpect"
 	"github.com/stretchr/testify/mock"
 
-	"github.com/JaneKetko/Buses/src/config"
 	"github.com/JaneKetko/Buses/src/routemanager"
 	"github.com/JaneKetko/Buses/src/routemanager/mocks"
 	"github.com/JaneKetko/Buses/src/stores/domain"
 	sst "github.com/JaneKetko/Buses/src/stores/serverstore"
 )
 
+const (
+	port = ":8000"
+)
+
 func forGetRoutes(t *testing.T, method, path string) {
-	cfg := &config.Config{
-		PortRESTServer: ":8000",
-	}
+
 	var routestrg mocks.RouteStorage
 	routeman := routemanager.NewRouteManager(&routestrg)
-	serv := NewRESTServer(routeman, cfg.PortRESTServer)
+	serv := NewRESTServer(routeman, port)
 
 	s := serv.managerHandlers()
 	server := httptest.NewServer(s)
@@ -73,7 +74,7 @@ func forGetRoutes(t *testing.T, method, path string) {
 	server.Close()
 	var rtstrg mocks.RouteStorage
 	rt := routemanager.NewRouteManager(&rtstrg)
-	busstation := NewRESTServer(rt, cfg.PortRESTServer)
+	busstation := NewRESTServer(rt, port)
 
 	s = busstation.managerHandlers()
 	server = httptest.NewServer(s)
@@ -100,12 +101,9 @@ func TestGetCurrentRoutes(t *testing.T) {
 
 func TestGetRoute(t *testing.T) {
 
-	cfg := &config.Config{
-		PortRESTServer: ":8000",
-	}
 	var routestrg mocks.RouteStorage
 	routeman := routemanager.NewRouteManager(&routestrg)
-	busstation := NewRESTServer(routeman, cfg.PortRESTServer)
+	busstation := NewRESTServer(routeman, port)
 
 	s := busstation.managerHandlers()
 	server := httptest.NewServer(s)
@@ -173,12 +171,10 @@ func TestGetRoute(t *testing.T) {
 }
 
 func TestCreateRoute(t *testing.T) {
-	cfg := &config.Config{
-		PortRESTServer: ":8000",
-	}
+
 	var routestrg mocks.RouteStorage
 	routeman := routemanager.NewRouteManager(&routestrg)
-	busstation := NewRESTServer(routeman, cfg.PortRESTServer)
+	busstation := NewRESTServer(routeman, port)
 
 	s := busstation.managerHandlers()
 	server := httptest.NewServer(s)
@@ -247,12 +243,10 @@ func TestCreateRoute(t *testing.T) {
 }
 
 func TestDeleteRoute(t *testing.T) {
-	cfg := &config.Config{
-		PortRESTServer: ":8000",
-	}
+
 	var routestrg mocks.RouteStorage
 	routeman := routemanager.NewRouteManager(&routestrg)
-	busstation := NewRESTServer(routeman, cfg.PortRESTServer)
+	busstation := NewRESTServer(routeman, port)
 
 	s := busstation.managerHandlers()
 	server := httptest.NewServer(s)
@@ -302,12 +296,10 @@ func TestDeleteRoute(t *testing.T) {
 	routestrg.AssertExpectations(t)
 }
 func TestSearchRoutes(t *testing.T) {
-	cfg := &config.Config{
-		PortRESTServer: ":8000",
-	}
+
 	var routestrg mocks.RouteStorage
 	routeman := routemanager.NewRouteManager(&routestrg)
-	busstation := NewRESTServer(routeman, cfg.PortRESTServer)
+	busstation := NewRESTServer(routeman, port)
 
 	s := busstation.managerHandlers()
 	server := httptest.NewServer(s)

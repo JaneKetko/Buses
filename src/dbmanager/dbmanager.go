@@ -49,6 +49,7 @@ func convertTypes(routeDB RouteDB) (domain.Route, error) {
 	return route, nil
 }
 
+//DBConfig - struct for database config info.
 type DBConfig struct {
 	Login    string
 	Passwd   string

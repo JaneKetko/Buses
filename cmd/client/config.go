@@ -13,10 +13,12 @@ import (
 type Config struct {
 	//Port for connecting with GRPC server.
 	PortGRPCServer string `short:"g" default:":8001"`
-	PortClient     string `short:"c" default:":8080"`
-	ConfigFile     string `short:"f" long:"configfile" description:"File with config"`
+	//Port for client work.
+	PortClient string `short:"c" default:":8080"`
+	ConfigFile string `short:"f" long:"configfile" description:"File with config"`
 }
 
+//Parse works with command arguments.
 func (c *Config) Parse() error {
 	parser := flags.NewParser(c, flags.Default|flags.IgnoreUnknown)
 	_, err := parser.Parse()
@@ -32,7 +34,7 @@ func (c *Config) Parse() error {
 	return nil
 }
 
-//GetData - get data from config file(new config object).
+//GetData - get data from config file.
 func (c *Config) LoadOptionsFromFile() error {
 	data, err := ioutil.ReadFile(c.ConfigFile)
 	if err != nil {
