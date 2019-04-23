@@ -1,5 +1,3 @@
-//+build dbtest
-
 package dbmanager
 
 import (
@@ -8,7 +6,6 @@ import (
 	"testing"
 	"time"
 
-	"github.com/JaneKetko/Buses/src/config"
 	"github.com/JaneKetko/Buses/src/stores/domain"
 
 	"github.com/stretchr/testify/assert"
@@ -18,7 +15,7 @@ import (
 )
 
 func dbOpen() (*sql.DB, error) {
-	config := &config.Config{
+	config := &DBConfig{
 		Login:    "root",
 		Passwd:   "root",
 		Hostname: "172.17.0.2",
@@ -41,16 +38,16 @@ func TestRouteID(t *testing.T) {
 	require.NoError(t, err)
 	dbmanager := NewDBManager(db)
 	id1, err := dbmanager.insertRoute(ctx, &insertRouteStorage{
-		ID:        7,
+		IDPoints:  1,
 		FreeSeats: 32,
 		AllSeats:  44,
 		Cost:      1500,
-		DateTime:  "2019-02-24 08:30:00",
+		DateTime:  "2020-02-24 08:30:00",
 	})
 
 	require.NoError(t, err)
 	_, err = dbmanager.insertRoute(ctx, &insertRouteStorage{
-		ID:        7,
+		IDPoints:  1,
 		FreeSeats: 32,
 		AllSeats:  44,
 		Cost:      1520,

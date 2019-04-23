@@ -1,0 +1,27 @@
+version: '3'
+services:
+  client:
+    build: ./cmd/client
+    entrypoint: 
+      - ls
+      - la
+      - ./client -g busservice:8001
+    ports:
+    - 8002:8002
+  busservice:
+    build: ./cmd/service
+    entrypoint: ./service -d dbsql:3306
+    ports:
+      #REST
+      - 8000:8000
+      #GRPC
+      - 8001:8001
+    depends_on:
+      - dbsql
+  dbsql:
+    container_name: busdb
+    build: ./src/dbmanager/dbsql
+    ports:
+      - 3306:3306
+    environment:
+      MYSQL_ROOT_PASSWORD: root

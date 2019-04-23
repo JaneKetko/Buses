@@ -24,7 +24,7 @@ func forGetRoutes(t *testing.T, method, path string) {
 	}
 	var routestrg mocks.RouteStorage
 	routeman := routemanager.NewRouteManager(&routestrg)
-	serv := NewRESTServer(routeman, cfg)
+	serv := NewRESTServer(routeman, cfg.PortRESTServer)
 
 	s := serv.managerHandlers()
 	server := httptest.NewServer(s)
@@ -73,7 +73,7 @@ func forGetRoutes(t *testing.T, method, path string) {
 	server.Close()
 	var rtstrg mocks.RouteStorage
 	rt := routemanager.NewRouteManager(&rtstrg)
-	busstation := NewRESTServer(rt, cfg)
+	busstation := NewRESTServer(rt, cfg.PortRESTServer)
 
 	s = busstation.managerHandlers()
 	server = httptest.NewServer(s)
@@ -105,7 +105,7 @@ func TestGetRoute(t *testing.T) {
 	}
 	var routestrg mocks.RouteStorage
 	routeman := routemanager.NewRouteManager(&routestrg)
-	busstation := NewRESTServer(routeman, cfg)
+	busstation := NewRESTServer(routeman, cfg.PortRESTServer)
 
 	s := busstation.managerHandlers()
 	server := httptest.NewServer(s)
@@ -178,7 +178,7 @@ func TestCreateRoute(t *testing.T) {
 	}
 	var routestrg mocks.RouteStorage
 	routeman := routemanager.NewRouteManager(&routestrg)
-	busstation := NewRESTServer(routeman, cfg)
+	busstation := NewRESTServer(routeman, cfg.PortRESTServer)
 
 	s := busstation.managerHandlers()
 	server := httptest.NewServer(s)
@@ -252,7 +252,7 @@ func TestDeleteRoute(t *testing.T) {
 	}
 	var routestrg mocks.RouteStorage
 	routeman := routemanager.NewRouteManager(&routestrg)
-	busstation := NewRESTServer(routeman, cfg)
+	busstation := NewRESTServer(routeman, cfg.PortRESTServer)
 
 	s := busstation.managerHandlers()
 	server := httptest.NewServer(s)
@@ -307,7 +307,7 @@ func TestSearchRoutes(t *testing.T) {
 	}
 	var routestrg mocks.RouteStorage
 	routeman := routemanager.NewRouteManager(&routestrg)
-	busstation := NewRESTServer(routeman, cfg)
+	busstation := NewRESTServer(routeman, cfg.PortRESTServer)
 
 	s := busstation.managerHandlers()
 	server := httptest.NewServer(s)

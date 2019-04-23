@@ -3,12 +3,10 @@ package dbmanager
 import (
 	"context"
 	"database/sql"
-	"errors"
 	"fmt"
 	"strconv"
 	"time"
 
-	"github.com/JaneKetko/Buses/src/config"
 	"github.com/JaneKetko/Buses/src/stores/domain"
 )
 
@@ -51,8 +49,16 @@ func convertTypes(routeDB RouteDB) (domain.Route, error) {
 	return route, nil
 }
 
+type DBConfig struct {
+	Login    string
+	Passwd   string
+	Hostname string
+	Port     int
+	DBName   string
+}
+
 //Open opens connection with database.
-func Open(cfg *config.Config) (*sql.DB, error) {
+func Open(cfg *DBConfig) (*sql.DB, error) {
 
 	db, err := sql.Open("mysql", fmt.Sprintf("%s:%s@tcp(%s:%s)/%s",
 		cfg.Login, cfg.Passwd, cfg.Hostname, strconv.Itoa(cfg.Port), cfg.DBName))
@@ -62,7 +68,7 @@ func Open(cfg *config.Config) (*sql.DB, error) {
 	}
 	err = db.Ping()
 	if err != nil {
-		return nil, errors.New("database hasn't connected")
+		return nil, fmt.Errorf("database hasn't connected: %s", err)
 	}
 	return db, nil
 }
@@ -74,13 +80,13 @@ func getData(ctx context.Context, dbmngr *DBManager, request string) ([]domain.R
 	rows, err := dbmngr.db.QueryContext(ctx, request)
 
 	if err != nil {
-		return nil, errors.New("data hasn't read")
+		return nil, fmt.Errorf("data hasn't read: %s", err)
 	}
 	for rows.Next() {
 		err = rows.Scan(&dbr.idRoute, &dbr.startTime, &dbr.cost, &dbr.freeSeats,
 			&dbr.allSeats, &dbr.idPoint, &dbr.startPoint, &dbr.endPoint)
 		if err != nil {
-			return nil, errors.New("no data")
+			return nil, err
 		}
 		route, err := convertTypes(dbr)
 		if err != nil {
@@ -138,7 +144,7 @@ func (dbmanager *DBManager) RouteByID(ctx context.Context, id int) (*domain.Rout
 
 	route, err := convertTypes(routeDB)
 	if err != nil {
-		return nil, errors.New("errors with types")
+		return nil, domain.ErrTypes
 	}
 	return &route, nil
 }
@@ -148,12 +154,12 @@ func (dbmanager *DBManager) DeleteRow(ctx context.Context, id int) error {
 
 	res, err := dbmanager.db.ExecContext(ctx, "DELETE FROM route where id_route=?", id)
 	if err != nil {
-		return errors.New("cannot delete route")
+		return fmt.Errorf("cannot delete route: %s", err)
 	}
 
 	n, err := res.RowsAffected()
 	if err != nil {
-		return errors.New("something wrong with deleting")
+		return fmt.Errorf("something wrong with deleting: %s", err)
 	}
 
 	if n == 0 {
@@ -170,7 +176,7 @@ func (dbmanager *DBManager) RoutesByEndPoint(ctx context.Context, endpoint strin
 	FROM route r JOIN points p on r.id_points = p.id_points WHERE p.endpoint=?`, endpoint)
 
 	if err != nil {
-		return nil, errors.New("data hasn't read")
+		return nil, fmt.Errorf("data hasn't read: %s", err)
 	}
 
 	var dbr RouteDB
@@ -179,7 +185,7 @@ func (dbmanager *DBManager) RoutesByEndPoint(ctx context.Context, endpoint strin
 		err = rows.Scan(&dbr.idRoute, &dbr.startTime, &dbr.cost, &dbr.freeSeats,
 			&dbr.allSeats, &dbr.idPoint, &dbr.startPoint, &dbr.endPoint)
 		if err != nil {
-			return nil, errors.New("no data")
+			return nil, err
 		}
 		route, err := convertTypes(dbr)
 		if err != nil {
@@ -200,7 +206,7 @@ func (dbmanager *DBManager) insertPoint(ctx context.Context, startpoint, endpoin
 		startpoint, endpoint)
 
 	if err != nil {
-		return 0, errors.New("cannot insert points")
+		return 0, fmt.Errorf("cannot insert points: %s", err)
 	}
 
 	pointID, err := res.LastInsertId()
@@ -211,7 +217,7 @@ func (dbmanager *DBManager) insertPoint(ctx context.Context, startpoint, endpoin
 }
 
 type insertRouteStorage struct {
-	ID        int
+	IDPoints  int
 	FreeSeats int
 	AllSeats  int
 	Cost      int
@@ -226,10 +232,10 @@ func (dbmanager *DBManager) insertRoute(ctx context.Context, rtinfo *insertRoute
 	}
 
 	res, err := dbmanager.db.ExecContext(ctx, `INSERT INTO route (id_points, starttime, cost, freeseats, allseats)
-	VALUES( ?, ?, ?, ?, ? )`, rtinfo.ID, date, rtinfo.Cost, rtinfo.FreeSeats, rtinfo.AllSeats)
+	VALUES( ?, ?, ?, ?, ? )`, rtinfo.IDPoints, date, rtinfo.Cost, rtinfo.FreeSeats, rtinfo.AllSeats)
 
 	if err != nil {
-		return 0, errors.New("cannot insert route")
+		return 0, fmt.Errorf("cannot insert route: %s", err)
 	}
 
 	idRoute, err := res.LastInsertId()
@@ -246,7 +252,7 @@ func (dbmanager *DBManager) AddRoute(ctx context.Context, r *domain.Route) (int,
 		r.Points.StartPoint, r.Points.EndPoint)
 
 	if err != nil {
-		return 0, errors.New("data hasn't read")
+		return 0, fmt.Errorf("data hasn't read: %s", err)
 	}
 
 	var pointID int64
@@ -262,7 +268,7 @@ func (dbmanager *DBManager) AddRoute(ctx context.Context, r *domain.Route) (int,
 		}
 	}
 	idRoute, err := dbmanager.insertRoute(ctx, &insertRouteStorage{
-		ID:        int(pointID),
+		IDPoints:  int(pointID),
 		FreeSeats: r.FreeSeats,
 		AllSeats:  r.AllSeats,
 		Cost:      r.Cost,

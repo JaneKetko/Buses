@@ -10,7 +10,6 @@ import (
 	"google.golang.org/grpc/reflection"
 
 	pb "github.com/JaneKetko/Buses/api/proto"
-	"github.com/JaneKetko/Buses/src/config"
 	"github.com/JaneKetko/Buses/src/routemanager"
 	"github.com/JaneKetko/Buses/src/stores/domain"
 	sst "github.com/JaneKetko/Buses/src/stores/serverstore"
@@ -21,21 +20,21 @@ import (
 //GRPSServer - struct for server.
 type GRPSServer struct {
 	manager *routemanager.RouteManager
-	config  *config.Config
+	address string
 }
 
 //NewGRPSServer - init server.
-func NewGRPSServer(r *routemanager.RouteManager, c *config.Config) *GRPSServer {
+func NewGRPSServer(r *routemanager.RouteManager, addr string) *GRPSServer {
 	return &GRPSServer{
 		manager: r,
-		config:  c,
+		address: addr,
 	}
 }
 
 //RunServer - start serving.
 func (s *GRPSServer) RunServer() {
 
-	lis, err := net.Listen("tcp", s.config.PortGRPCServer)
+	lis, err := net.Listen("tcp", s.address)
 	if err != nil {
 		log.Fatalf("failed to listen: %v", err)
 	}
